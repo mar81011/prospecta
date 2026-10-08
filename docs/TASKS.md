@@ -46,10 +46,11 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Next up
 
-1. [ ] Admin → Settings: enter the real GCash number and account name.
-2. [ ] Account: add your mobile number (shown on public listing pages).
-3. [ ] Deploy (Facebook can't build a preview card from a localhost link — see Open items).
-4. [ ] Roadmap B (lead pipeline) or C (AI assistant).
+1. [ ] **Apply migrations `20261010000001` (lead pipeline) and `20261010000002` (AI)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then the app on the hosted DB will error on Leads.
+2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
+3. [ ] Add `ANTHROPIC_API_KEY` to `.env.local` / Vercel to turn on the AI features.
+4. [ ] Deploy: push to GitHub → import in Vercel → env vars → Supabase Auth URLs (README → Deploying).
+5. [ ] Admin → Settings: real GCash number; Account: your mobile number.
 
 ## Product roadmap — lead generation (list → share on Facebook → leads come in)
 
@@ -62,16 +63,18 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [x] Over-limit inquiries are kept but locked until upgrade (buyers are never lost; acts as an upgrade prompt). Note: the lock hides details in the app UI; it's not enforced at the database column level.
 - [x] Listing photos (up to 10, compressed in the browser, cover photo), Account page for agent name + mobile.
 
-**B. Lead pipeline**
-- [ ] Lead statuses: New → Contacted → Qualified → Site viewing → Negotiating → Won / Lost.
-- [ ] Lead detail page: notes timeline, linked listing, next follow-up, site-viewing schedule.
-- [ ] Lead scoring (simple rules first, AI later).
+**B. Lead pipeline** ✅ built 2026-10-10 (unit + DB tests pass; e2e pending hosted migration)
+- [x] Lead stages: New → Contacted → Qualified → Site viewing → Negotiating → Won / Lost, with stage tabs and counts.
+- [x] Lead page: timeline (auto-logged stage/schedule changes, buyer inquiry, notes), call/text/email buttons, follow-up date, site viewing.
+- [x] Dashboard "Today": follow-ups due, viewings this week.
+- [x] Rule-based Hot/Warm/Cold score with reasons (`src/lib/leads.ts`). Locked leads can't be worked (enforced by RLS).
 
-**C. AI assistant (in Prospecta's backend)**
-- [ ] "Write with AI" for listing title and description (counts against the plan's AI quota via `consumeAiGeneration`).
-- [ ] AI-written Facebook post caption.
-- [ ] AI chat assistant on the public listing page: answers buyer questions from the listing details, collects contact info, creates/updates the lead.
-- [ ] AI summary, score and suggested status for each lead.
+**C. AI assistant (in Prospecta's backend)** ✅ built 2026-10-10 (needs `ANTHROPIC_API_KEY`; e2e uses the fake provider)
+- [x] "Write with AI" title + description (English / Taglish / Tagalog).
+- [x] AI Facebook caption.
+- [x] Buyer chat on public listing pages (Starter/Pro): answers from listing facts, collects contact → lead + transcript on the lead page. Capped 12 replies/chat, 100/listing/day; falls back to the form when the agent's quota is used.
+- [x] "Analyze lead": summary, hot/warm/cold, suggested stage, next step (saved to the timeline).
+- Every AI call is charged to the plan's monthly AI quota (refunded on failure). Model: `claude-opus-5-5` by default; set `AI_MODEL` to change it (e.g. a cheaper model).
 
 **D. Facebook automation** — dropped by decision above. (For reference: it would need a Meta app, business verification and App Review; Meta never allows reading personal-profile or group comments/messages.)
 
@@ -81,11 +84,13 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [ ] **Deploy:** Vercel project, production env vars, update Supabase Auth Site URL / redirect URLs to the production domain.
 - [ ] **Cron:** confirm Vercel Cron calls `/api/cron/subscriptions` daily with `CRON_SECRET`.
 - [x] Supabase access token shared in chat was revoked (2026-10-09). Future migrations need a new token, the Supabase MCP sign-in (`/mcp`), or pasting the SQL into the dashboard SQL editor. All migrations up to `20261009000003` are applied.
-- [ ] `git init` and first commit.
+- [x] Git repository initialized; first commit on `main` (no remote yet).
 - [ ] Property matching (spec §1).
 - [ ] **Phase 8 — PayMongo:** only after traction + business verification (spec §28).
 
 ## Changelog
+
+- 2026-10-10 — Roadmap B (lead pipeline) and C (AI assistant) built; `npm run db:apply` script; deploy guide in README; git repo initialized. Tests: 81 unit/DB passing.
 
 - 2026-10-08 — MVP built: auth, plans, manual GCash flow, admin dashboard, subscriptions, notifications, audit log, RLS. Migrations applied to hosted Supabase.
 - 2026-10-09 — Roadmap A: public listing pages with Facebook preview tags, Share to Facebook / Copy caption / Copy link, buyer inquiries → leads (source-tagged, locked over limit, unlocked on upgrade), listing photos, Account page. e2e: 58 passing.

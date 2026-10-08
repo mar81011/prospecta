@@ -119,12 +119,49 @@ Mutations use **Server Actions**, which are server-side POST endpoints that re-c
 
 ```bash
 npm test            # unit tests + database tests
+npm run test:e2e    # Playwright, against a production build + the Supabase project in .env.local
 npm run typecheck
 npm run lint
 npm run build
 ```
 
-`tests/db` runs every migration in PGlite (in-process Postgres) with small stand-ins for Supabase's `auth`/`storage` schemas, then tests the security rules and billing flows as real `authenticated` and `service_role` users. No Docker needed. Before launch, also walk through the flows above against `supabase start`.
+`tests/db` runs every migration in PGlite (in-process Postgres) with small stand-ins for Supabase's `auth`/`storage` schemas, then tests the security rules and billing flows as real `authenticated` and `service_role` users. No Docker needed.
+
+`e2e/` drives the real app in a headless browser.
+- **Test accounts:** it creates throwaway accounts (`e2e.*@example.com`) through the admin API, so no emails are sent, and deletes them afterwards.
+- **Settings:** it snapshots and restores app settings and plan prices.
+- **AI:** it uses the fake AI provider, so it costs nothing.
+- **Database:** your Supabase project must have every migration applied first (`npm run db:apply`).
+
+## AI assistant
+
+Claude powers four features. Each one uses 1 AI generation from the agent's monthly plan quota, refunded if the call fails:
+
+| Feature | Where | Who can use it |
+| --- | --- | --- |
+| Write title and description | Listing form → "Write with AI" | All plans |
+| Facebook caption | Listing edit page → Share | All plans |
+| Analyze lead (summary, hot/warm/cold, next step) | Lead page | All plans |
+| Buyer chat (answers questions, collects contact, creates the lead) | Public listing page | Starter and Pro |
+
+- Code lives in `src/lib/ai/`. `anthropic.ts` is the Claude implementation; `fake.ts` is a deterministic stand-in used by tests (`AI_PROVIDER=fake`).
+- The model only ever sees public listing facts (`facts.ts`), never IDs, emails or private data.
+- Buyer chat is capped at 12 replies per conversation and 100 per listing per day. When the agent's quota runs out, buyers see the inquiry form instead, and the agent's plan is never mentioned.
+- Without `ANTHROPIC_API_KEY`, the AI buttons are hidden.
+
+## Deploying (Vercel + Supabase)
+
+1. **Database:** apply pending migrations to the hosted project from your own terminal:
+   `$env:SUPABASE_ACCESS_TOKEN="sbp_..."; npm run db:apply` (PowerShell). Use `--dry-run` to preview.
+2. **Code:** push this repo to GitHub, then import it at https://vercel.com/new (framework: Next.js, no build settings needed).
+3. **Environment variables** in Vercel → Settings → Environment Variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospecta.vercel.app`. Share links and Facebook previews use this.
+   - `CRON_SECRET`: a long random string
+   - `ANTHROPIC_API_KEY`, and optionally `AI_MODEL`
+4. **Supabase Auth** → URL Configuration: set Site URL to the production URL, and add `https://<your-domain>/**` to Redirect URLs.
+5. **Cron:** `vercel.json` already schedules `/api/cron/subscriptions` daily. Vercel sends `CRON_SECRET` automatically.
+6. **Check it works:** open a listing's public page and paste its link into https://developers.facebook.com/tools/debug/ to see the preview card.
 
 ## Future PayMongo
 
