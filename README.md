@@ -149,18 +149,18 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 - Buyer chat is capped at 12 replies per conversation and 100 per listing per day. When the agent's quota runs out, buyers see the inquiry form instead, and the agent's plan is never mentioned.
 - Without `ANTHROPIC_API_KEY`, the AI buttons are hidden.
 
-## Deploying (Vercel + Supabase)
+## Deploying (Netlify + Supabase)
 
 1. **Database:** apply pending migrations to the hosted project from your own terminal:
    `$env:SUPABASE_ACCESS_TOKEN="sbp_..."; npm run db:apply` (PowerShell). Use `--dry-run` to preview.
-2. **Code:** push this repo to GitHub, then import it at https://vercel.com/new (framework: Next.js, no build settings needed).
-3. **Environment variables** in Vercel → Settings → Environment Variables:
+2. **Code:** push this repo to GitHub, then import it at https://app.netlify.com/start (Netlify detects Next.js; no build settings needed).
+3. **Environment variables** in Netlify → Project configuration → Environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospecta.vercel.app`. Share links and Facebook previews use this.
+   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospecta-812.netlify.app`. Share links and Facebook previews use this.
    - `CRON_SECRET`: a long random string
    - `ANTHROPIC_API_KEY`, and optionally `AI_MODEL`
 4. **Supabase Auth** → URL Configuration: set Site URL to the production URL, and add `https://<your-domain>/**` to Redirect URLs.
-5. **Cron:** `vercel.json` already schedules `/api/cron/subscriptions` daily. Vercel sends `CRON_SECRET` automatically.
+5. **Cron:** the Netlify scheduled function `netlify/functions/subscriptions-cron.mts` calls `/api/cron/subscriptions` daily at 16:00 UTC with `CRON_SECRET`. (`vercel.json` does the same if you ever host on Vercel.)
 6. **Check it works:** open a listing's public page and paste its link into https://developers.facebook.com/tools/debug/ to see the preview card.
 
 ## Future PayMongo

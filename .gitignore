@@ -47,3 +47,6 @@ next-env.d.ts
 /e2e/.state/
 /playwright/.cache/
 /e2e/.run.log
+
+# Local Netlify folder
+.netlify
