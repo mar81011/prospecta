@@ -49,7 +49,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 1. [ ] **Apply migrations `20261010000001` (lead pipeline) and `20261010000002` (AI)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then the app on the hosted DB will error on Leads.
 2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
 3. [ ] Add `ANTHROPIC_API_KEY` to `.env.local` / Netlify to turn on the AI features.
-4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospecta-812.netlify.app
+4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospectaph.netlify.app
 5. [ ] Admin → Settings: real GCash number; Account: your mobile number.
 
 ## Product roadmap — lead generation (list → share on Facebook → leads come in)
@@ -81,8 +81,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 ## Open items / known gaps
 
 - [ ] **Email:** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
-- [x] **Deploy:** Netlify site `prospecta-812` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).
-- [ ] **Supabase Auth:** set Site URL / redirect URLs to https://prospecta-812.netlify.app.
+- [x] **Deploy:** Netlify site `prospectaph` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).
+- [ ] **Supabase Auth:** set Site URL / redirect URLs to https://prospectaph.netlify.app.
 - [ ] **Cron:** confirm the Netlify scheduled function `subscriptions-cron` calls `/api/cron/subscriptions` daily (Netlify → Logs → Functions).
 - [x] Supabase access token shared in chat was revoked (2026-10-09). Future migrations need a new token, the Supabase MCP sign-in (`/mcp`), or pasting the SQL into the dashboard SQL editor. All migrations up to `20261009000003` are applied.
 - [x] Git repository initialized; pushed to https://github.com/mar81011/prospecta.
@@ -91,7 +91,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Changelog
 
-- 2026-10-09 — Hosting moved to Netlify: scheduled function `netlify/functions/subscriptions-cron.mts` replaces Vercel Cron; site `prospecta-812` created with env vars; repo pushed to GitHub.
+- 2026-10-09 — Hosting moved to Netlify: scheduled function `netlify/functions/subscriptions-cron.mts` replaces Vercel Cron; site `prospectaph` created with env vars; repo pushed to GitHub.
 
 - 2026-10-10 — Roadmap B (lead pipeline) and C (AI assistant) built; `npm run db:apply` script; deploy guide in README; git repo initialized. Tests: 81 unit/DB passing.
 

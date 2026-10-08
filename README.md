@@ -156,7 +156,7 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 2. **Code:** push this repo to GitHub, then import it at https://app.netlify.com/start (Netlify detects Next.js; no build settings needed).
 3. **Environment variables** in Netlify → Project configuration → Environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospecta-812.netlify.app`. Share links and Facebook previews use this.
+   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospectaph.netlify.app`. Share links and Facebook previews use this.
    - `CRON_SECRET`: a long random string
    - `ANTHROPIC_API_KEY`, and optionally `AI_MODEL`
 4. **Supabase Auth** → URL Configuration: set Site URL to the production URL, and add `https://<your-domain>/**` to Redirect URLs.
