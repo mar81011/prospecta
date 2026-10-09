@@ -24,6 +24,9 @@ export type PublicListing = {
   agent_name: string;
   agent_phone: string;
   agent_photo: string | null;
+  agent_slug?: string;
+  agent_messenger?: string;
+  agent_viber?: boolean;
   photos: string[];
 };
 
@@ -33,4 +36,39 @@ export const getPublicListing = cache(async (slug: string): Promise<PublicListin
   const supabase = await createClient();
   const { data } = await supabase.rpc("get_public_listing", { p_slug: slug });
   return (data as unknown as PublicListing | null) ?? null;
+});
+
+export type PublicAgentListing = Pick<
+  PublicListing,
+  | "slug"
+  | "title"
+  | "listing_type"
+  | "property_type"
+  | "price_centavos"
+  | "city"
+  | "province"
+  | "bedrooms"
+  | "bathrooms"
+  | "floor_area_sqm"
+  | "lot_area_sqm"
+  | "parking_slots"
+> & { cover: string | null };
+
+export type PublicAgent = {
+  slug: string;
+  name: string;
+  phone: string;
+  photo: string | null;
+  bio: string;
+  messenger: string;
+  viber: boolean;
+  listings: PublicAgentListing[];
+};
+
+/** An agent's public page data by handle (null if unknown). Deduped per request. */
+export const getPublicAgent = cache(async (slug: string): Promise<PublicAgent | null> => {
+  if (!/^[a-z0-9-]{1,60}$/.test(slug)) return null;
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("get_public_agent", { p_slug: slug });
+  return (data as unknown as PublicAgent | null) ?? null;
 });

@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateImage } from "@/lib/billing/screenshot";
 import { AGENT_PHOTO_BUCKET } from "@/lib/listings";
+import { parseMessenger, toPhilippineE164 } from "@/lib/contact";
 import type { FormState } from "@/lib/actions/state";
 
 const schema = z.object({
@@ -17,16 +18,49 @@ const schema = z.object({
     .trim()
     .max(30)
     .refine((v) => v === "" || /^\+?[0-9 ()-]{7,20}$/.test(v), "Enter a valid mobile number, e.g. 0917 123 4567."),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(
+      /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/,
+      "Your page link can use 3-40 lowercase letters, numbers and dashes, and can't start or end with a dash.",
+    ),
+  bio: z.string().trim().max(300, "Keep your bio under 300 characters."),
+  messenger: z.string().transform((v, ctx) => {
+    const parsed = parseMessenger(v);
+    if (parsed === null) {
+      ctx.addIssue({ code: "custom", message: "Enter your Facebook username or profile link, e.g. facebook.com/ana.reyes." });
+      return z.NEVER;
+    }
+    return parsed;
+  }),
+  viber: z.boolean(),
 });
 
 export async function updateProfile(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
-  const parsed = schema.safeParse({ name: formData.get("name"), phone: formData.get("phone") ?? "" });
+  // The page-link fields only exist after migration 20261011000002; the form
+  // leaves them out until then.
+  const full = formData.has("slug");
+  const parsed = (full ? schema : schema.pick({ name: true, phone: true })).safeParse({
+    name: formData.get("name"),
+    phone: formData.get("phone") ?? "",
+    slug: formData.get("slug"),
+    bio: formData.get("bio") ?? "",
+    messenger: formData.get("messenger") ?? "",
+    viber: formData.get("viber") === "on",
+  });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const data = parsed.data as Partial<z.infer<typeof schema>> & { name: string; phone: string };
+  if (data.viber && !toPhilippineE164(data.phone)) {
+    return { error: "To show a Viber button, enter a Philippine mobile number (e.g. 0917 123 4567)." };
+  }
 
   const supabase = await createClient();
-  // Column grants only allow agents to change name and phone.
-  const { error } = await supabase.from("profiles").update(parsed.data).eq("id", user.id);
+  // Column grants limit agents to these public profile fields.
+  const { error } = await supabase.from("profiles").update(data).eq("id", user.id);
+  if (error?.code === "23505") return { error: "That page link is already taken. Try another." };
   if (error) return { error: "Could not save your profile. Please try again." };
   revalidatePath("/", "layout");
   return { message: "Profile saved." };

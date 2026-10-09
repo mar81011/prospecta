@@ -3,13 +3,14 @@ import { planFeatures } from "@/lib/plans/entitlements";
 import { formatPHP } from "@/lib/format";
 import { ButtonLink, Card, cx } from "@/components/ui";
 
-const LEVEL_LABEL: Record<string, string> = {
-  none: "Not included",
-  basic: "Basic",
-  standard: "Included",
-  full: "Full",
-  advanced: "Advanced",
-};
+// Only list what the app actually does today. Planned features are shown as
+// "coming soon" so the cards never promise something that isn't there.
+const EVERY_PLAN = [
+  "Public listing pages with Facebook sharing",
+  "Your own agent page with Call, Messenger and Viber buttons",
+  "Lead pipeline with lead scoring and site-viewing reminders",
+  "Listing stats: views and contact taps",
+];
 
 function limit(n: number | null, unit: string) {
   return n === null ? `High / unlimited ${unit} (fair use)` : `${n.toLocaleString()} ${unit}`;
@@ -31,16 +32,17 @@ export function PlanCards({
         const f = planFeatures(plan);
         const isCurrent = currentPlan === plan.id;
         const featured = plan.id === "pro";
+        const aiChat = (plan.features as Record<string, unknown> | null)?.aiChat === true;
         const rows = [
           limit(plan.max_active_listings, "active listings"),
           limit(plan.max_leads_per_month, "leads / month"),
           limit(plan.max_ai_generations_per_month, "AI generations / month"),
-          `Lead management: ${LEVEL_LABEL[f.leadManagement]}${f.advancedCrm ? " + Advanced CRM" : ""}`,
-          `Lead scoring: ${LEVEL_LABEL[f.leadScoring]}`,
-          `Property AI tools: ${LEVEL_LABEL[f.propertyAiTools]}`,
-          `Site-viewing management: ${LEVEL_LABEL[f.siteViewing]}`,
-          `Messenger: ${f.messengerAutomation ? "Advanced AI automation" : LEVEL_LABEL[f.messenger]}`,
-          `Property matching: ${LEVEL_LABEL[f.propertyMatching]}`,
+          ...(aiChat ? ["AI assistant that answers buyers on your listing pages 24/7"] : []),
+          ...EVERY_PLAN,
+        ];
+        const soon = [
+          ...(f.propertyMatching !== "none" ? ["Property matching for your leads"] : []),
+          ...(f.messengerAutomation ? ["Messenger auto-replies"] : []),
         ];
 
         let cta;
@@ -84,7 +86,7 @@ export function PlanCards({
               </p>
               <p className="mt-2 text-sm text-zinc-600">{plan.description}</p>
             </div>
-            <ul className="mb-6 flex-1 space-y-2 text-sm text-zinc-700">
+            <ul className="flex-1 space-y-2 text-sm text-zinc-700">
               {rows.map((r) => (
                 <li key={r} className="flex gap-2">
                   <span aria-hidden className="text-brand-500">
@@ -94,6 +96,20 @@ export function PlanCards({
                 </li>
               ))}
             </ul>
+            {soon.length > 0 && (
+              <div className="mt-4 border-t border-dashed border-zinc-200 pt-3">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">Coming soon</p>
+                <ul className="space-y-1.5 text-sm text-zinc-500">
+                  {soon.map((r) => (
+                    <li key={r} className="flex gap-2">
+                      <span aria-hidden>○</span>
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="mt-6" />
             {cta}
           </Card>
         );

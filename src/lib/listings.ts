@@ -152,6 +152,12 @@ export function publicListingUrl(slug: string, ref?: "fb"): string {
   return `${base}/p/${slug}${ref ? `?ref=${ref}` : ""}`;
 }
 
+/** An agent's public page: profile and all active listings. */
+export function publicAgentUrl(slug: string): string {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  return `${base}/a/${slug}`;
+}
+
 /** Facebook's share dialog. Facebook reads the title, description and photo from the page's Open Graph tags. */
 export function facebookShareUrl(slug: string): string {
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicListingUrl(slug, "fb"))}`;

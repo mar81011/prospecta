@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/database.types";
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/forgot-password", "/pricing", "/auth", "/p"];
+const PUBLIC_PATHS = ["/", "/login", "/register", "/forgot-password", "/pricing", "/auth", "/p", "/a"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || (p !== "/" && pathname.startsWith(p + "/")));

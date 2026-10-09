@@ -70,10 +70,22 @@ export type Database = {
           plan_expires_at: string | null;
           phone: string;
           photo_path: string | null;
+          slug: string;
+          bio: string;
+          messenger: string;
+          viber: boolean;
         } & Timestamps;
         Insert: never;
         // photo_path: service role only (no column grant for agents).
-        Update: { name?: string; phone?: string; photo_path?: string | null };
+        Update: {
+          name?: string;
+          phone?: string;
+          slug?: string;
+          bio?: string;
+          messenger?: string;
+          viber?: boolean;
+          photo_path?: string | null;
+        };
         Relationships: [];
       };
       payments: {
@@ -284,6 +296,15 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean };
       get_my_entitlements: { Args: never; Returns: Json };
       get_public_listing: { Args: { p_slug: string }; Returns: Json };
+      get_public_agent: { Args: { p_slug: string }; Returns: Json };
+      record_listing_event: {
+        Args: { p_slug: string; p_kind: string; p_channel: string; p_source: string };
+        Returns: undefined;
+      };
+      my_listing_stats: {
+        Args: { p_since: string };
+        Returns: { listing_id: string; views: number; contacts: number }[];
+      };
       submit_inquiry: {
         Args: { p_slug: string; p_name: string; p_phone: string; p_email: string; p_message: string; p_source: string };
         Returns: undefined;

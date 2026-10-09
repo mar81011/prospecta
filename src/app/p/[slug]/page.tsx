@@ -16,6 +16,7 @@ import {
 } from "@/lib/listings";
 import { InquiryForm } from "./inquiry-form";
 import { ChatWidget } from "./chat-widget";
+import { ContactButtons, ViewTracker } from "@/components/contact-buttons";
 import { isAiConfigured } from "@/lib/ai";
 import { createClient } from "@/lib/supabase/server";
 
@@ -63,6 +64,7 @@ export default async function PublicListingPage({ params, searchParams }: PagePr
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+        <ViewTracker slug={l.slug} source={source} />
         <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
           <div className="space-y-4">
             {cover ? (
@@ -112,24 +114,33 @@ export default async function PublicListingPage({ params, searchParams }: PagePr
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-            <Card className="flex items-center gap-4">
-              {l.agent_photo && (
-                // eslint-disable-next-line @next/next/no-img-element -- Supabase public URL
-                <img
-                  src={agentPhotoUrl(l.agent_photo)}
-                  alt={l.agent_name || "Agent"}
-                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-zinc-200"
-                />
-              )}
-              <div>
-                <p className="text-xs uppercase tracking-wide text-zinc-500">Listed by</p>
-                <p className="font-semibold">{l.agent_name || "Prospecta agent"}</p>
-                {l.agent_phone && (
-                  <a href={`tel:${l.agent_phone.replace(/[^\d+]/g, "")}`} className="mt-1 inline-block text-brand-600 hover:underline">
-                    📞 {l.agent_phone}
-                  </a>
+            <Card className="space-y-4">
+              <div className="flex items-center gap-4">
+                {l.agent_photo && (
+                  // eslint-disable-next-line @next/next/no-img-element -- Supabase public URL
+                  <img
+                    src={agentPhotoUrl(l.agent_photo)}
+                    alt={l.agent_name || "Agent"}
+                    className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-zinc-200"
+                  />
                 )}
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-zinc-500">Listed by</p>
+                  <p className="font-semibold">{l.agent_name || "Prospecta agent"}</p>
+                  {l.agent_slug && (
+                    <Link href={`/a/${l.agent_slug}`} className="text-sm text-brand-600 hover:underline">
+                      See all listings →
+                    </Link>
+                  )}
+                </div>
               </div>
+              <ContactButtons
+                phone={l.agent_phone}
+                messenger={l.agent_messenger ?? ""}
+                viber={l.agent_viber ?? false}
+                listingSlug={l.slug}
+                source={source}
+              />
             </Card>
             {showChat && <ChatWidget slug={l.slug} source={source} agentName={l.agent_name} />}
             <InquiryForm slug={l.slug} source={source} title={l.title} />

@@ -19,6 +19,8 @@ import {
   propertyTypeLabel,
 } from "@/lib/listings";
 import { ListingStatusButton } from "./listing-status-button";
+import { requireUser } from "@/lib/auth/require";
+import { getMyListingStats } from "@/lib/listing-stats";
 import { DeleteListingButton } from "./delete-listing-button";
 
 export const metadata: Metadata = { title: "Listings" };
@@ -36,14 +38,28 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
     .order("status")
     .order("created_at", { ascending: false });
   if (filter !== "all") query = query.eq("listing_type", filter);
-  const [ent, { data: listings }] = await Promise.all([getEntitlements(), query]);
+  const [user, ent, { data: listings }, stats] = await Promise.all([
+    requireUser(),
+    getEntitlements(),
+    query,
+    getMyListingStats(30),
+  ]);
 
   return (
     <>
       <PageHeader
         title="Listings"
-        description="Archived listings don't count toward your plan's limit."
-        actions={<ButtonLink href="/listings/new">Add listing</ButtonLink>}
+        description="Views and contact taps cover the last 30 days; leads are all-time. Archived listings don't count toward your plan's limit."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {user.profile.slug && (
+              <ButtonLink href={`/a/${user.profile.slug}`} target="_blank" variant="secondary">
+                My agent page
+              </ButtonLink>
+            )}
+            <ButtonLink href="/listings/new">Add listing</ButtonLink>
+          </div>
+        }
       />
       {saved && (
         <div className="mb-4">
@@ -83,6 +99,7 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
             const location = listingLocation(l);
             const cover = [...l.listing_photos].sort((a, b) => a.position - b.position)[0];
             const inquiries = l.leads[0]?.count ?? 0;
+            const s = stats?.get(l.id) ?? { views: 0, contacts: 0 };
             return (
               <Card key={l.id} data-testid="listing-card" className={cx("flex flex-col gap-3 overflow-hidden", l.status === "archived" && "opacity-70")}>
                 <Link href={`/listings/${l.id}/edit#photos`} className="-mx-5 -mt-5 block bg-zinc-100">
@@ -109,6 +126,22 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
                 )}
                 {specs && <p className="text-sm text-zinc-700">{specs}</p>}
                 {l.description && <p className="line-clamp-3 whitespace-pre-line text-sm text-zinc-600">{l.description}</p>}
+                {stats && l.status === "active" && (
+                  <dl className="grid grid-cols-3 divide-x divide-zinc-200 rounded-lg bg-zinc-50 py-2 text-center" title="Last 30 days">
+                    <div>
+                      <dt className="text-[11px] uppercase tracking-wide text-zinc-500">Views</dt>
+                      <dd className="font-semibold text-zinc-900">{s.views.toLocaleString()}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] uppercase tracking-wide text-zinc-500">Contact taps</dt>
+                      <dd className="font-semibold text-zinc-900">{s.contacts.toLocaleString()}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] uppercase tracking-wide text-zinc-500">Leads</dt>
+                      <dd className="font-semibold text-zinc-900">{inquiries.toLocaleString()}</dd>
+                    </div>
+                  </dl>
+                )}
                 {l.status === "active" && (
                   <ShareButtons
                     compact

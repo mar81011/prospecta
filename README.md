@@ -83,9 +83,12 @@ Prices, the billing period and limits live in the `plans` table. Admins edit the
 | Active listings | 5 | 25 | no fixed limit (fair use) |
 | Leads / month | 50 | 250 | no fixed limit |
 | AI generations / month | 10 | 100 | no fixed limit |
+| AI buyer chat on listing pages | – | ✓ | ✓ |
+
+Every plan gets public listing pages, an agent page (`/a/{slug}`) with Call/Messenger/Viber buttons, the lead pipeline, and listing stats (views and contact taps, recorded by `record_listing_event()`; the agent's own visits and crawlers are skipped). Property matching and Messenger auto-replies are shown as "coming soon" on the plan cards.
 
 ### Daily maintenance
-Vercel Cron (`vercel.json`, 00:00 Manila) calls `GET /api/cron/subscriptions` with `Authorization: Bearer $CRON_SECRET`. The job:
+A Netlify scheduled function (`netlify/functions/subscriptions-cron.mts`, 00:00 Manila) calls `GET /api/cron/subscriptions` with `Authorization: Bearer $CRON_SECRET`. The job:
 
 - marks lapsed plans `expired`;
 - expires `PENDING` requests older than the configured TTL;

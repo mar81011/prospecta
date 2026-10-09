@@ -11,6 +11,33 @@ import { daysUntilExpiry, RENEWAL_WARNING_DAYS } from "@/lib/billing/expiry";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { isFollowUpDue, OPEN_STATUSES, weekWindow } from "@/lib/leads";
+import { getMyListingStats, totalStats } from "@/lib/listing-stats";
+
+function WeekStats({ views, contacts, leads }: { views: number; contacts: number; leads: number }) {
+  const items = [
+    { label: "Listing views", value: views, hint: "People who opened your listing pages" },
+    { label: "Contact taps", value: contacts, hint: "Call, Messenger and Viber button taps" },
+    { label: "New leads", value: leads, hint: "Inquiries and leads you added" },
+  ];
+  return (
+    <Card className="mb-6">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="font-semibold">Last 7 days</h2>
+        <Link href="/listings" className="text-sm text-brand-600 hover:underline">
+          Per listing →
+        </Link>
+      </div>
+      <dl className="grid grid-cols-3 gap-3">
+        {items.map((i) => (
+          <div key={i.label} className="rounded-lg bg-zinc-50 p-3" title={i.hint}>
+            <dt className="text-xs text-zinc-500">{i.label}</dt>
+            <dd className="text-2xl font-bold tracking-tight text-zinc-900">{i.value.toLocaleString()}</dd>
+          </div>
+        ))}
+      </dl>
+    </Card>
+  );
+}
 
 type ScheduledLead = {
   id: string;
@@ -65,7 +92,8 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const supabase = await createClient();
   const { now, weekAhead } = weekWindow();
-  const [ent, latest, notifications, { data: scheduled }] = await Promise.all([
+  const weekAgo = new Date(new Date(now).getTime() - 7 * 86_400_000).toISOString();
+  const [ent, latest, notifications, { data: scheduled }, stats, { count: newLeads }] = await Promise.all([
     getEntitlements(),
     getMyLatestPayment(user.id),
     listNotifications(5),
@@ -76,7 +104,10 @@ export default async function DashboardPage() {
       .in("status", OPEN_STATUSES)
       .or(`next_follow_up_at.not.is.null,viewing_at.lte.${weekAhead}`)
       .limit(100),
+    getMyListingStats(7),
+    supabase.from("leads").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
   ]);
+  const week = stats ? totalStats(stats) : null;
 
   const daysLeft = daysUntilExpiry(user.profile);
   const lapsed = user.profile.plan !== "free" && ent.effective_plan === "free";
@@ -126,6 +157,8 @@ export default async function DashboardPage() {
           </Alert>
         )}
       </div>
+
+      {week && <WeekStats views={week.views} contacts={week.contacts} leads={newLeads ?? 0} />}
 
       <TodayCard
         due={(scheduled ?? []).filter((l) => isFollowUpDue(l))}
