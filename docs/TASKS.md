@@ -46,9 +46,9 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Next up
 
-1. [ ] **Apply migrations `20261010000001` (lead pipeline), `20261010000002` (AI), `20261011000001` (agent photos) and `20261011000002` (agent pages, contact buttons, stats) and `20261011000003` (phone sign-ups)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then Leads errors, profile photo uploads fail, and agent pages / Messenger-Viber fields / stats stay hidden.
+1. [x] **Migrations applied to the hosted project (2026-10-11)** via the Supabase MCP: `20261010000001` … `20261011000004` (lead pipeline, AI, agent photos, agent pages/contact/stats, phone sign-ups, hardening). Security advisor reviewed: remaining warnings are the intentionally public RPCs and admin functions that check `is_admin()`.
 2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
-3. [ ] Add `ANTHROPIC_API_KEY` to `.env.local` / Netlify to turn on the AI features.
+3. [x] `ANTHROPIC_API_KEY` and `AI_MODEL=claude-sonnet-5-5` set in Netlify (2026-10-11). Rotate the key (it was pasted in chat).
 4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospectaph.netlify.app
 5. [ ] Admin → Settings: real GCash number; Account: your mobile number.
 
@@ -92,6 +92,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [ ] **Phase 8 — PayMongo:** only after traction + business verification (spec §28).
 
 ## Changelog
+
+- 2026-10-11 — All pending migrations applied to hosted Supabase; hardening migration `20261011000004` (trigger functions not callable via API, pinned search_path). AI enabled in production (Sonnet).
 
 - 2026-10-11 — Replaced Facebook sign-in with "Continue with Google" (behind `GOOGLE_LOGIN_ENABLED`); privacy policy updated. Header avatar linking to Account.
 
