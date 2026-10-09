@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps<"/a/[slug]">): Prom
     title,
     description,
     alternates: { canonical: publicAgentUrl(a.slug) },
-    openGraph: { type: "profile", title, description, url: publicAgentUrl(a.slug), siteName: "Prospecta", images: image ? [image] : [] },
+    openGraph: { type: "profile", title, description, url: publicAgentUrl(a.slug), siteName: "Prospecta", images: [image ?? { url: "/og.png", width: 1200, height: 630 }] },
   };
 }
 

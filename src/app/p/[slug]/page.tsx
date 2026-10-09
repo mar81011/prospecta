@@ -29,13 +29,16 @@ export async function generateMetadata({ params }: PageProps<"/p/[slug]">): Prom
   const description = [formatListingPrice(l), listingLocation(l), listingSpecs(l as unknown as Listing)]
     .filter(Boolean)
     .join(" · ");
-  const images = l.photos.length ? [{ url: listingPhotoUrl(l.photos[0]), width: 1200, height: 900 }] : [];
+  const images = l.photos.length
+    ? // Size hint lets Facebook show the photo on a link's very first share; uploads are mostly 4:3.
+      [{ url: listingPhotoUrl(l.photos[0]), width: 1200, height: 900 }]
+    : [{ url: "/og.png", width: 1200, height: 630 }];
   return {
     title,
     description,
     alternates: { canonical: publicListingUrl(l.slug) },
     openGraph: { type: "website", title, description, url: publicListingUrl(l.slug), images, siteName: "Prospecta" },
-    twitter: { card: images.length ? "summary_large_image" : "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
