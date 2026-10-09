@@ -139,7 +139,13 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
                       Edit
                     </Link>
                     <ListingStatusButton id={l.id} status={l.status} />
-                    <DeleteListingButton id={l.id} title={l.title} />
+                    <DeleteListingButton
+                      id={l.id}
+                      title={l.title}
+                      coverUrl={cover ? listingPhotoUrl(cover.path) : undefined}
+                      photoCount={l.listing_photos.length}
+                      leadCount={inquiries}
+                    />
                   </div>
                 </div>
               </Card>
