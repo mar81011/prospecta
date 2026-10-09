@@ -3,6 +3,12 @@ import { AuthForm } from "../auth-form";
 import { signIn } from "../actions";
 import { safeNext } from "@/lib/actions/state";
 import { isSmsSignInEnabled } from "@/lib/sms";
+import { FACEBOOK_LOGIN_ENABLED } from "@/lib/env";
+
+const ERRORS: Record<string, string> = {
+  link: "That link is invalid or has expired. Please try again.",
+  facebook: "Facebook sign-in didn't finish. Please try again, or use another way below.",
+};
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -14,7 +20,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       action={signIn}
       next={safeNext(next)}
       phoneEnabled={isSmsSignInEnabled()}
-      initialError={error === "link" ? "That link is invalid or has expired. Please try again." : undefined}
+      facebookEnabled={FACEBOOK_LOGIN_ENABLED()}
+      initialError={typeof error === "string" ? ERRORS[error] : undefined}
     />
   );
 }

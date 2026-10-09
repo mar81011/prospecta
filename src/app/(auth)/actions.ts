@@ -102,6 +102,25 @@ export async function verifyPhoneCode(phone: string, code: string, next?: string
   redirect(safeNext(next));
 }
 
+// Facebook sign-in (Supabase OAuth, PKCE). New users get a Free profile named
+// after their Facebook name; /auth/callback exchanges the code for a session.
+export async function signInWithFacebook(formData: FormData) {
+  const next = safeNext(formData.get("next"));
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "facebook",
+    options: {
+      redirectTo: `${SITE_URL()}/auth/callback?next=${encodeURIComponent(next)}`,
+      scopes: "email",
+    },
+  });
+  if (error || !data.url) {
+    console.error("signInWithOAuth(facebook) failed", error?.message);
+    redirect("/login?error=facebook");
+  }
+  redirect(data.url);
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

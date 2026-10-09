@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { useFormAction } from "@/lib/actions/use-form-action";
 import { initialFormState, type FormState } from "@/lib/actions/state";
 import { PhoneAuth } from "./phone-auth";
+import { signInWithFacebook } from "./actions";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -22,6 +23,7 @@ export function AuthForm({
   next,
   initialError,
   phoneEnabled = false,
+  facebookEnabled = false,
 }: {
   mode: Mode;
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
@@ -29,6 +31,8 @@ export function AuthForm({
   initialError?: string;
   /** Show the mobile number (SMS code) option; false until SMS is configured. */
   phoneEnabled?: boolean;
+  /** Show "Continue with Facebook"; false until the provider is set up. */
+  facebookEnabled?: boolean;
 }) {
   const [state, formAction, formActionPending] = useFormAction(action);
   const error = state === initialFormState ? initialError : state.error;
@@ -53,6 +57,30 @@ export function AuthForm({
     <Card>
       <h1 className="mb-1 text-xl font-semibold">{copy.title}</h1>
       <p className="mb-6 text-sm text-zinc-600">{copy.subtitle}</p>
+      {mode !== "forgot" && facebookEnabled && (
+        <>
+          <form action={signInWithFacebook}>
+            {next && <input type="hidden" name="next" value={next} />}
+            <button
+              type="submit"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#166FE5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1877F2]"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden className="h-5 w-5 fill-current">
+                <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07" />
+              </svg>
+              Continue with Facebook
+            </button>
+          </form>
+          <p className="mt-2 text-center text-xs text-zinc-500">
+            We only get your name, email and profile picture. We never post on your behalf.
+          </p>
+          <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wide text-zinc-400">
+            <span className="h-px flex-1 bg-zinc-200" />
+            or
+            <span className="h-px flex-1 bg-zinc-200" />
+          </div>
+        </>
+      )}
       {mode !== "forgot" && phoneEnabled && (
         <div role="tablist" aria-label="Sign-in method" className="mb-5 grid grid-cols-2 rounded-lg bg-zinc-100 p-1 text-sm font-medium">
           {(["phone", "email"] as const).map((m) => (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,7 +14,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        {children}
+        <footer className="mt-auto border-t border-zinc-200 py-4 text-center text-xs text-zinc-500">
+          © Prospecta ·{" "}
+          <Link href="/privacy" className="hover:text-zinc-800 hover:underline">
+            Privacy Policy
+          </Link>
+        </footer>
+      </body>
     </html>
   );
 }
