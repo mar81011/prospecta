@@ -39,6 +39,10 @@ export function AuthForm({
   const copy = COPY[mode];
   // Mobile number first: many agents rarely check email.
   const [method, setMethod] = useState<"phone" | "email">(phoneEnabled && !initialError ? "phone" : "email");
+  // With Facebook on, it is the only way to register; on Login, email/password
+  // stays available behind a link (admins, older accounts, Facebook outages).
+  const facebookFirst = facebookEnabled && mode !== "forgot";
+  const [showOther, setShowOther] = useState(!facebookFirst);
 
   if (state.message) {
     return (
@@ -74,14 +78,29 @@ export function AuthForm({
           <p className="mt-2 text-center text-xs text-zinc-500">
             We only get your name, email and profile picture. We never post on your behalf.
           </p>
-          <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wide text-zinc-400">
-            <span className="h-px flex-1 bg-zinc-200" />
-            or
-            <span className="h-px flex-1 bg-zinc-200" />
-          </div>
+          {!showOther && error && (
+            <div className="mt-4">
+              <Alert tone="error">{error}</Alert>
+            </div>
+          )}
+          {showOther ? (
+            <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wide text-zinc-400">
+              <span className="h-px flex-1 bg-zinc-200" />
+              or
+              <span className="h-px flex-1 bg-zinc-200" />
+            </div>
+          ) : (
+            mode === "login" && (
+              <p className="mt-5 text-center text-sm">
+                <button type="button" onClick={() => setShowOther(true)} className="text-zinc-600 underline-offset-2 hover:text-zinc-900 hover:underline">
+                  Sign in with email instead
+                </button>
+              </p>
+            )
+          )}
         </>
       )}
-      {mode !== "forgot" && phoneEnabled && (
+      {showOther && mode !== "forgot" && phoneEnabled && (
         <div role="tablist" aria-label="Sign-in method" className="mb-5 grid grid-cols-2 rounded-lg bg-zinc-100 p-1 text-sm font-medium">
           {(["phone", "email"] as const).map((m) => (
             <button
@@ -100,7 +119,7 @@ export function AuthForm({
           ))}
         </div>
       )}
-      {mode !== "forgot" && method === "phone" ? (
+      {!showOther ? null : mode !== "forgot" && method === "phone" ? (
         <PhoneAuth mode={mode} next={next} />
       ) : (
         <form onSubmit={formAction} className="space-y-4">
@@ -134,7 +153,7 @@ export function AuthForm({
       <div className="mt-6 space-y-2 text-center text-sm text-zinc-600">
         {mode === "login" ? (
           <>
-            {method === "email" && (
+            {showOther && method === "email" && (
               <p>
                 <Link href="/forgot-password" className="text-brand-600 hover:underline">
                   Forgot your password?
