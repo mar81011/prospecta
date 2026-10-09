@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/env";
 import { safeNext, type FormState } from "@/lib/actions/state";
 import { toPhilippineE164 } from "@/lib/contact";
+import { isGoogleDirectConfigured } from "@/lib/google-oauth";
 
 const credentials = z.object({
   email: z.email("Enter a valid email address.").trim().toLowerCase(),
@@ -106,6 +107,9 @@ export async function verifyPhoneCode(phone: string, code: string, next?: string
 // after their Google name; /auth/callback exchanges the code for a session.
 export async function signInWithGoogle(formData: FormData) {
   const next = safeNext(formData.get("next"));
+  // Preferred: our own /auth/google flow, so Google's screen names our domain
+  // rather than the Supabase project URL. Falls back to Supabase's redirect.
+  if (isGoogleDirectConfigured()) redirect(`/auth/google?next=${encodeURIComponent(next)}`);
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

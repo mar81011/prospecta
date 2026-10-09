@@ -41,6 +41,7 @@ After that, admins can promote other users from **Admin → Agents → Manage**.
 | `NEXT_PUBLIC_SITE_URL` | server | Used in auth email links |
 | `CRON_SECRET` | server | Bearer token for `/api/cron/subscriptions` |
 | `GOOGLE_LOGIN_ENABLED` | server | `true` shows "Continue with Google" (see Google sign-in) |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | server | Optional: Google sign-in through our own domain instead of the Supabase URL |
 | `SEND_SMS_HOOK_SECRET` | server | Supabase Send SMS hook secret (`v1,whsec_…`) |
 | `SEMAPHORE_API_KEY` | server | Semaphore SMS API key; optional `SEMAPHORE_SENDER_NAME` |
 
@@ -182,6 +183,8 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 5. **Supabase → Authentication → Sign In / Providers → Google:** enable it and paste the Client ID and secret.
 6. **Supabase → Authentication → URL Configuration:** Site URL `https://<your-domain>`, and `https://<your-domain>/**` in Redirect URLs.
 7. **Netlify env:** `GOOGLE_LOGIN_ENABLED=true`, then redeploy.
+
+**Our own domain on Google's screen (recommended).** By default Google's consent screen says "to continue to <project-ref>.supabase.co", which looks like phishing. Setting `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` switches to our own flow (`/auth/google` → Google → `/auth/google/callback` → `signInWithIdToken`), so it says "to continue to <your-domain>". Add `https://<your-domain>/auth/google/callback` (and `http://localhost:3000/auth/google/callback` for local testing) to the Google client's **Authorized redirect URIs**. The Supabase Google provider must keep the same Client ID (it checks the token's audience).
 
 ## Mobile number sign-in (SMS codes)
 
