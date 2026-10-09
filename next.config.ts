@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "6mb" },
   },
+  // Fonts read at runtime by the generated share images (opengraph-image).
+  outputFileTracingIncludes: {
+    "/**": ["./assets/fonts/**/*", "./node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf"],
+  },
 };
 
 export default nextConfig;

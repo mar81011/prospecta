@@ -20,24 +20,27 @@ import { ContactButtons, ViewTracker } from "@/components/contact-buttons";
 import { isAiConfigured } from "@/lib/ai";
 import { createClient } from "@/lib/supabase/server";
 
-// Open Graph tags drive the Facebook preview card (title, price, cover photo).
+// Open Graph tags drive the Facebook preview card. The image (price, details and
+// agent over the cover photo) comes from ./opengraph-image.tsx; Facebook shows
+// the description as one short line, so it leads with the agent's name and price.
 export async function generateMetadata({ params }: PageProps<"/p/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const l = await getPublicListing(slug);
   if (!l) return { title: "Listing not available" };
   const title = `${l.listing_type === "rent" ? "For rent" : "For sale"}: ${l.title}`;
-  const description = [formatListingPrice(l), listingLocation(l), listingSpecs(l as unknown as Listing)]
+  const description = [
+    l.agent_name && `Listed by ${l.agent_name}`,
+    formatListingPrice(l),
+    listingSpecs(l as unknown as Listing),
+    listingLocation(l),
+  ]
     .filter(Boolean)
     .join(" · ");
-  const images = l.photos.length
-    ? // Size hint lets Facebook show the photo on a link's very first share; uploads are mostly 4:3.
-      [{ url: listingPhotoUrl(l.photos[0]), width: 1200, height: 900 }]
-    : [{ url: "/og.png", width: 1200, height: 630 }];
   return {
     title,
     description,
     alternates: { canonical: publicListingUrl(l.slug) },
-    openGraph: { type: "website", title, description, url: publicListingUrl(l.slug), images, siteName: "Prospecta" },
+    openGraph: { type: "website", title, description, url: publicListingUrl(l.slug), siteName: "Prospecta" },
     twitter: { card: "summary_large_image", title, description },
   };
 }
