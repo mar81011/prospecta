@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/env";
 import { safeNext, type FormState } from "@/lib/actions/state";
+import { toPhilippineE164 } from "@/lib/contact";
 
 const credentials = z.object({
   email: z.email("Enter a valid email address.").trim().toLowerCase(),
@@ -54,6 +55,51 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
   // With email confirmation on, there is no session until the link is clicked.
   if (data.session) redirect("/dashboard");
   return { message: `We sent a confirmation link to ${parsed.data.email}. Open it to activate your account.` };
+}
+
+// ---------------------------------------------------------------------------
+// Mobile number sign-in: Supabase sends a 6-digit code by SMS (via the
+// /api/auth/sms-hook -> Semaphore), then verifyPhoneCode() starts the session.
+// ---------------------------------------------------------------------------
+
+export type PhoneCodeResult = { error?: string; phone?: string };
+
+export async function sendPhoneCode(
+  mode: "login" | "register",
+  input: { phone: string; name?: string },
+): Promise<PhoneCodeResult> {
+  const phone = toPhilippineE164(input.phone);
+  if (!phone) return { error: "Enter a Philippine mobile number, e.g. 0917 123 4567." };
+  const name = (input.name ?? "").trim();
+  if (mode === "register" && (name.length < 2 || name.length > 100)) return { error: "Enter your name." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    phone,
+    options: { shouldCreateUser: mode === "register", channel: "sms", data: mode === "register" ? { name } : undefined },
+  });
+  if (error) {
+    if (mode === "login" && (error.code === "otp_disabled" || /signups? not allowed/i.test(error.message))) {
+      return { error: "No account uses this number yet. Create an account first." };
+    }
+    if (error.status === 429 || error.code?.includes("rate_limit")) {
+      return { error: "Please wait a minute before asking for another code." };
+    }
+    console.error("signInWithOtp failed", error.code, error.message);
+    return { error: "We couldn't send the code. Check the number and try again." };
+  }
+  return { phone };
+}
+
+export async function verifyPhoneCode(phone: string, code: string, next?: string): Promise<{ error?: string }> {
+  const e164 = toPhilippineE164(phone);
+  const token = code.replace(/\D/g, "");
+  if (!e164 || token.length !== 6) return { error: "Enter the 6-digit code from the SMS." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ phone: e164, token, type: "sms" });
+  if (error) return { error: "That code is wrong or has expired. Request a new one." };
+  redirect(safeNext(next));
 }
 
 export async function signOut() {

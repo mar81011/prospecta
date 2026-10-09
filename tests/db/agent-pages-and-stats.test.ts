@@ -137,3 +137,23 @@ describe("listing stats", () => {
     );
   });
 });
+
+describe("phone sign-ups", () => {
+  it("create a profile with no email and the number as contact phone", async () => {
+    const id = crypto.randomUUID();
+    await db.root(`insert into auth.users (id, phone, raw_user_meta_data) values ($1, '639171234567', '{"name":"Ana Reyes"}')`, [id]);
+    const [p] = await db.root<{ email: string; phone: string; name: string; slug: string }>(
+      `select email, phone, name, slug from public.profiles where id = $1`,
+      [id],
+    );
+    expect(p).toMatchObject({ email: "", phone: "0917 123 4567", name: "Ana Reyes" });
+    expect(p.slug).toMatch(/^ana-reyes-[0-9a-f]{6}$/);
+  });
+
+  it("leave the phone blank for email sign-ups and unusual numbers", async () => {
+    const id = crypto.randomUUID();
+    await db.root(`insert into auth.users (id, phone) values ($1, '14155550100')`, [id]);
+    const [p] = await db.root<{ phone: string }>(`select phone from public.profiles where id = $1`, [id]);
+    expect(p.phone).toBe("");
+  });
+});

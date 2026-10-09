@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except static assets and the cron endpoint (which uses its own secret).
-    "/((?!_next/static|_next/image|favicon.ico|api/cron|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Everything except static assets and the cron and SMS-hook endpoints (which use their own secrets).
+    "/((?!_next/static|_next/image|favicon.ico|api/cron|api/auth/sms-hook|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

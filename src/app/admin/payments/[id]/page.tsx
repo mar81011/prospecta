@@ -29,7 +29,7 @@ export default async function AdminPaymentDetailPage({ params, searchParams }: P
       "Email",
       payment.agent ? (
         <Link href={`/admin/agents/${payment.agent.id}`} className="text-brand-600 hover:underline">
-          {payment.agent.email}
+          {payment.agent.email || payment.agent.phone || payment.agent.name}
         </Link>
       ) : (
         "—"

@@ -111,7 +111,7 @@ export default async function DashboardPage() {
 
   const daysLeft = daysUntilExpiry(user.profile);
   const lapsed = user.profile.plan !== "free" && ent.effective_plan === "free";
-  const name = user.profile.name || user.email;
+  const name = user.profile.name || user.email || "there";
 
   return (
     <>

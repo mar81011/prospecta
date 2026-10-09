@@ -57,7 +57,7 @@ export default async function AdminPaymentsPage({ searchParams }: PageProps<"/ad
               <tr key={p.id}>
                 <Td>
                   <p className="font-medium text-zinc-900">{p.agent?.name || "—"}</p>
-                  <p className="text-xs text-zinc-500">{p.agent?.email}</p>
+                  <p className="text-xs text-zinc-500">{p.agent?.email || p.agent?.phone}</p>
                 </Td>
                 <Td>
                   <PlanBadge plan={p.plan_id} />

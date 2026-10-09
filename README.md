@@ -40,6 +40,8 @@ After that, admins can promote other users from **Admin → Agents → Manage**.
 | `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Screenshot uploads, invites, cron |
 | `NEXT_PUBLIC_SITE_URL` | server | Used in auth email links |
 | `CRON_SECRET` | server | Bearer token for `/api/cron/subscriptions` |
+| `SEND_SMS_HOOK_SECRET` | server | Supabase Send SMS hook secret (`v1,whsec_…`) |
+| `SEMAPHORE_API_KEY` | server | Semaphore SMS API key; optional `SEMAPHORE_SENDER_NAME` |
 
 In production, update the Supabase Auth email templates to match `supabase/templates/*.html`. They link to `/auth/confirm?token_hash=…`, which is required for admin invites to work with server-side auth.
 
@@ -165,6 +167,18 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 4. **Supabase Auth** → URL Configuration: set Site URL to the production URL, and add `https://<your-domain>/**` to Redirect URLs.
 5. **Cron:** the Netlify scheduled function `netlify/functions/subscriptions-cron.mts` calls `/api/cron/subscriptions` daily at 16:00 UTC with `CRON_SECRET`. (`vercel.json` does the same if you ever host on Vercel.)
 6. **Check it works:** open a listing's public page and paste its link into https://developers.facebook.com/tools/debug/ to see the preview card.
+
+## Mobile number sign-in (SMS codes)
+
+Agents can register and sign in with a Philippine mobile number and a 6-digit SMS code, with no email or password. Supabase creates and checks the codes; its **Send SMS hook** calls `/api/auth/sms-hook`, which verifies the hook signature and sends the code through [Semaphore](https://semaphore.co)'s OTP endpoint. Only `+63 9xx` numbers are accepted, which also blocks SMS-pumping to foreign numbers.
+
+1. **Semaphore:** create an account, load credits (an OTP SMS costs 2 credits), copy the API key. Optionally register a sender name such as `PROSPECTA`.
+2. **Supabase → Authentication → Sign In / Providers → Phone:** enable it. If it asks for an SMS provider, any value works; the hook replaces it.
+3. **Supabase → Authentication → Hooks → Send SMS hook:** type HTTPS, URL `https://<your-domain>/api/auth/sms-hook`, generate a secret and copy it.
+4. **Netlify env vars:** `SEND_SMS_HOOK_SECRET` (the `v1,whsec_…` value), `SEMAPHORE_API_KEY`, optionally `SEMAPHORE_SENDER_NAME`. Redeploy. The "Mobile number" tab on Login/Register appears only once both required variables are set.
+5. **Supabase → Authentication → Rate Limits:** set "SMS messages" per hour to what your Semaphore budget allows.
+
+New phone users get a profile with an empty email, and their number becomes their contact number on listing pages.
 
 ## Future PayMongo
 

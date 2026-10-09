@@ -25,8 +25,8 @@ export default async function AdminAgentPage({ params }: PageProps<"/admin/agent
         ← All agents
       </Link>
       <PageHeader
-        title={profile.name || profile.email}
-        description={profile.email}
+        title={profile.name || profile.email || profile.phone}
+        description={profile.email || profile.phone}
         actions={profile.role === "admin" && <Badge className="bg-brand-100 text-brand-700">admin</Badge>}
       />
 

@@ -17,7 +17,7 @@ export default async function AccountPage() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <PageHeader title="Account" description={user.email} />
+      <PageHeader title="Account" description={user.email || p.phone} />
 
       {pageUrl && (
         <Card className="space-y-3 border-brand-100 bg-brand-50/40">

@@ -5,7 +5,7 @@ import type { PaymentStatus } from "@/lib/database.types";
 // Admin read queries. They run as the signed-in admin; RLS grants admins read
 // access to every agent's rows, and non-admins get empty results.
 
-const PAYMENT_WITH_AGENT = "*, agent:profiles!payments_agent_id_fkey(id, name, email), plan:plans(name)";
+const PAYMENT_WITH_AGENT = "*, agent:profiles!payments_agent_id_fkey(id, name, email, phone), plan:plans(name)";
 
 export type AdminOverview = {
   total_agents: number;
@@ -70,7 +70,7 @@ export async function listAgents(search?: string) {
   let query = supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200);
   if (search) {
     const s = search.replace(/[%,()]/g, " ").trim();
-    if (s) query = query.or(`name.ilike.%${s}%,email.ilike.%${s}%`);
+    if (s) query = query.or(`name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%`);
   }
   const { data } = await query;
   return data ?? [];

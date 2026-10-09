@@ -85,7 +85,7 @@ export default async function AdminAgentsPage({ searchParams }: PageProps<"/admi
                       {a.name || "—"}
                       {a.role === "admin" && <Badge className="ml-2 bg-brand-100 text-brand-700">admin</Badge>}
                     </p>
-                    <p className="text-xs text-zinc-500">{a.email}</p>
+                    <p className="text-xs text-zinc-500">{a.email || a.phone}</p>
                   </Td>
                   <Td>
                     <PlanBadge plan={eff} />

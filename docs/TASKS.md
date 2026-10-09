@@ -46,7 +46,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Next up
 
-1. [ ] **Apply migrations `20261010000001` (lead pipeline), `20261010000002` (AI), `20261011000001` (agent photos) and `20261011000002` (agent pages, contact buttons, stats)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then Leads errors, profile photo uploads fail, and agent pages / Messenger-Viber fields / stats stay hidden.
+1. [ ] **Apply migrations `20261010000001` (lead pipeline), `20261010000002` (AI), `20261011000001` (agent photos) and `20261011000002` (agent pages, contact buttons, stats) and `20261011000003` (phone sign-ups)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then Leads errors, profile photo uploads fail, and agent pages / Messenger-Viber fields / stats stay hidden.
 2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
 3. [ ] Add `ANTHROPIC_API_KEY` to `.env.local` / Netlify to turn on the AI features.
 4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospectaph.netlify.app
@@ -80,7 +80,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Open items / known gaps
 
-- [ ] **Email:** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
+- [ ] **SMS sign-in setup:** Semaphore account + credits, enable Phone provider, Send SMS hook, Netlify env vars (README → Mobile number sign-in).
+- [ ] **Email (deferred 2026-10-11, most agents don't check email):** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
 - [x] **Deploy:** Netlify site `prospectaph` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).
 - [ ] **Supabase Auth:** set Site URL / redirect URLs to https://prospectaph.netlify.app.
 - [ ] **Cron:** confirm the Netlify scheduled function `subscriptions-cron` calls `/api/cron/subscriptions` daily (Netlify → Logs → Functions).
@@ -90,6 +91,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [ ] **Phase 8 — PayMongo:** only after traction + business verification (spec §28).
 
 ## Changelog
+
+- 2026-10-11 — Mobile number sign-in/registration with SMS codes (Supabase Send SMS hook → `/api/auth/sms-hook` → Semaphore OTP, PH numbers only). Email kept as the second tab. Migration `20261011000003`. Tests: 120 passing. Setup: README → Mobile number sign-in.
 
 - 2026-10-11 — Agent pages `/a/[slug]` (photo, bio, contact buttons, active listings; editable handle on Account), Call/Messenger/Viber buttons on listing pages, listing stats (30-day views and contact taps per listing, 7-day summary on the dashboard), plan cards list only built features plus "coming soon". Migration `20261011000002`. Tests: 111 passing.
 - 2026-10-11 — Agents can delete listings (photos removed from storage, leads kept) and upload a profile photo (Account page), shown on public listing pages. Migration `20261011000001_agent_photos.sql`. Homepage demo + "Why upgrade?" section. Tests: 85 passing.
