@@ -19,6 +19,7 @@ import {
   propertyTypeLabel,
 } from "@/lib/listings";
 import { ListingStatusButton } from "./listing-status-button";
+import { DeleteListingButton } from "./delete-listing-button";
 
 export const metadata: Metadata = { title: "Listings" };
 
@@ -116,7 +117,7 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
                     caption={facebookCaption(l)}
                   />
                 )}
-                <div className="mt-auto flex items-center justify-between border-t border-zinc-100 pt-3 text-sm">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-3 text-sm">
                   <span className="text-xs text-zinc-500">
                     Added {formatDate(l.created_at)}
                     {inquiries > 0 && (
@@ -128,7 +129,7 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
                       </>
                     )}
                   </span>
-                  <div className="flex items-start gap-4">
+                  <div className="flex flex-wrap items-start justify-end gap-x-4 gap-y-2">
                     {l.status === "active" && (
                       <Link href={`/p/${l.slug}`} target="_blank" className="text-brand-600 hover:underline">
                         View
@@ -138,6 +139,7 @@ export default async function ListingsPage({ searchParams }: PageProps<"/listing
                       Edit
                     </Link>
                     <ListingStatusButton id={l.id} status={l.status} />
+                    <DeleteListingButton id={l.id} title={l.title} />
                   </div>
                 </div>
               </Card>

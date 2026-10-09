@@ -69,9 +69,11 @@ export type Database = {
           plan_status: Database["public"]["Enums"]["plan_status"];
           plan_expires_at: string | null;
           phone: string;
+          photo_path: string | null;
         } & Timestamps;
         Insert: never;
-        Update: { name?: string; phone?: string };
+        // photo_path: service role only (no column grant for agents).
+        Update: { name?: string; phone?: string; photo_path?: string | null };
         Relationships: [];
       };
       payments: {

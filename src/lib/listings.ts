@@ -140,6 +140,13 @@ export function listingPhotoUrl(path: string): string {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${LISTING_PHOTO_BUCKET}/${path}`;
 }
 
+export const AGENT_PHOTO_BUCKET = "agent-photos";
+
+/** Public URL of an agent profile photo. */
+export function agentPhotoUrl(path: string): string {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${AGENT_PHOTO_BUCKET}/${path}`;
+}
+
 export function publicListingUrl(slug: string, ref?: "fb"): string {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   return `${base}/p/${slug}${ref ? `?ref=${ref}` : ""}`;

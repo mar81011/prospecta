@@ -1,9 +1,13 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { validateImage } from "@/lib/billing/screenshot";
+import { AGENT_PHOTO_BUCKET } from "@/lib/listings";
 import type { FormState } from "@/lib/actions/state";
 
 const schema = z.object({
@@ -26,4 +30,42 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   if (error) return { error: "Could not save your profile. Please try again." };
   revalidatePath("/", "layout");
   return { message: "Profile saved." };
+}
+
+// Profile photo. Agents have no grant on photo_path, so after validating the
+// bytes the service role writes the file and the column, scoped to this user.
+
+export async function uploadAgentPhoto(_prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a photo." };
+  const img = await validateImage(file, "Photos");
+  if (!img.ok) return { error: img.error };
+
+  const admin = createAdminClient();
+  const path = `${user.id}/${randomUUID()}.${img.kind.ext}`;
+  const upload = await admin.storage
+    .from(AGENT_PHOTO_BUCKET)
+    .upload(path, img.bytes, { contentType: img.kind.contentType, upsert: false });
+  if (upload.error) return { error: "Your photo could not be uploaded. Please try again." };
+
+  const { error } = await admin.from("profiles").update({ photo_path: path }).eq("id", user.id);
+  if (error) {
+    await admin.storage.from(AGENT_PHOTO_BUCKET).remove([path]);
+    return { error: "Could not save your photo. Please try again." };
+  }
+  if (user.profile.photo_path) await admin.storage.from(AGENT_PHOTO_BUCKET).remove([user.profile.photo_path]);
+  revalidatePath("/", "layout");
+  return { message: "Photo updated." };
+}
+
+export async function removeAgentPhoto(): Promise<FormState> {
+  const user = await requireUser();
+  if (!user.profile.photo_path) return {};
+  const admin = createAdminClient();
+  const { error } = await admin.from("profiles").update({ photo_path: null }).eq("id", user.id);
+  if (error) return { error: "Could not remove your photo. Please try again." };
+  await admin.storage.from(AGENT_PHOTO_BUCKET).remove([user.profile.photo_path]);
+  revalidatePath("/", "layout");
+  return { message: "Photo removed." };
 }

@@ -46,7 +46,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Next up
 
-1. [ ] **Apply migrations `20261010000001` (lead pipeline) and `20261010000002` (AI)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then the app on the hosted DB will error on Leads.
+1. [ ] **Apply migrations `20261010000001` (lead pipeline), `20261010000002` (AI) and `20261011000001` (agent photos)** to the hosted project: `npm run db:apply` with a token (see README → Deploying). Until then the app on the hosted DB will error on Leads, and profile photo uploads fail.
 2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
 3. [ ] Add `ANTHROPIC_API_KEY` to `.env.local` / Netlify to turn on the AI features.
 4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospectaph.netlify.app
@@ -90,6 +90,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [ ] **Phase 8 — PayMongo:** only after traction + business verification (spec §28).
 
 ## Changelog
+
+- 2026-10-11 — Agents can delete listings (photos removed from storage, leads kept) and upload a profile photo (Account page), shown on public listing pages. Migration `20261011000001_agent_photos.sql`. Homepage demo + "Why upgrade?" section. Tests: 85 passing.
 
 - 2026-10-09 — Hosting moved to Netlify: scheduled function `netlify/functions/subscriptions-cron.mts` replaces Vercel Cron; site `prospectaph` created with env vars; repo pushed to GitHub.
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Card, PageHeader } from "@/components/ui";
 import { requireUser } from "@/lib/auth/require";
 import { ProfileForm } from "./profile-form";
+import { PhotoForm } from "./photo-form";
+import { agentPhotoUrl } from "@/lib/listings";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -11,6 +13,13 @@ export default async function AccountPage() {
   return (
     <div className="max-w-xl space-y-6">
       <PageHeader title="Account" description={user.email} />
+      <Card>
+        <h2 className="mb-4 font-semibold">Profile photo</h2>
+        <PhotoForm
+          name={user.profile.name}
+          photoUrl={user.profile.photo_path ? agentPhotoUrl(user.profile.photo_path) : null}
+        />
+      </Card>
       <Card>
         <h2 className="mb-4 font-semibold">Profile</h2>
         <ProfileForm name={user.profile.name} phone={user.profile.phone} />

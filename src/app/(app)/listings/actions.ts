@@ -54,6 +54,28 @@ export async function setListingStatus(id: string, status: "active" | "archived"
   return {};
 }
 
+/**
+ * Permanently deletes a listing. Photo rows and AI chats cascade; leads stay
+ * (listing_id is set to null). Photo files are removed from storage afterwards.
+ */
+export async function deleteListing(id: string): Promise<FormState> {
+  await requireUser();
+  if (!uuid.safeParse(id).success) return { error: "Invalid listing." };
+  const supabase = await createClient();
+  const { data: photos } = await supabase.from("listing_photos").select("path").eq("listing_id", id);
+
+  const { data, error } = await supabase.from("listings").delete().eq("id", id).select("id");
+  if (error) return { error: friendlyError(error) };
+  if (!data?.length) return { error: "Listing not found." };
+
+  if (photos?.length) {
+    await createAdminClient().storage.from(LISTING_PHOTO_BUCKET).remove(photos.map((p) => p.path));
+  }
+  revalidatePath("/listings");
+  revalidatePath("/leads");
+  return {};
+}
+
 // ---------------------------------------------------------------------------
 // Photos
 // ---------------------------------------------------------------------------

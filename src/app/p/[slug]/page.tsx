@@ -5,6 +5,7 @@ import { Badge, Card, Logo } from "@/components/ui";
 import { getPublicListing } from "@/lib/public-listing";
 import type { Listing } from "@/lib/database.types";
 import {
+  agentPhotoUrl,
   formatListingPrice,
   listingLocation,
   listingPhotoUrl,
@@ -111,14 +112,24 @@ export default async function PublicListingPage({ params, searchParams }: PagePr
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-            <Card>
-              <p className="text-xs uppercase tracking-wide text-zinc-500">Listed by</p>
-              <p className="font-semibold">{l.agent_name || "Prospecta agent"}</p>
-              {l.agent_phone && (
-                <a href={`tel:${l.agent_phone.replace(/[^\d+]/g, "")}`} className="mt-1 inline-block text-brand-600 hover:underline">
-                  📞 {l.agent_phone}
-                </a>
+            <Card className="flex items-center gap-4">
+              {l.agent_photo && (
+                // eslint-disable-next-line @next/next/no-img-element -- Supabase public URL
+                <img
+                  src={agentPhotoUrl(l.agent_photo)}
+                  alt={l.agent_name || "Agent"}
+                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-zinc-200"
+                />
               )}
+              <div>
+                <p className="text-xs uppercase tracking-wide text-zinc-500">Listed by</p>
+                <p className="font-semibold">{l.agent_name || "Prospecta agent"}</p>
+                {l.agent_phone && (
+                  <a href={`tel:${l.agent_phone.replace(/[^\d+]/g, "")}`} className="mt-1 inline-block text-brand-600 hover:underline">
+                    📞 {l.agent_phone}
+                  </a>
+                )}
+              </div>
             </Card>
             {showChat && <ChatWidget slug={l.slug} source={source} agentName={l.agent_name} />}
             <InquiryForm slug={l.slug} source={source} title={l.title} />

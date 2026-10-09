@@ -23,6 +23,7 @@ export type PublicListing = {
   updated_at: string;
   agent_name: string;
   agent_phone: string;
+  agent_photo: string | null;
   photos: string[];
 };
 

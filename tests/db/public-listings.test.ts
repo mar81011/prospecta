@@ -99,9 +99,10 @@ describe("photos", () => {
     expect(mine.id).toBeTruthy();
   });
 
-  it("the photo bucket is public, the payment screenshot bucket is not", async () => {
+  it("the photo buckets are public, the payment screenshot bucket is not", async () => {
     const rows = await db.root<{ id: string; public: boolean }>(`select id, public from storage.buckets order by id`);
     expect(rows).toEqual([
+      { id: "agent-photos", public: true },
       { id: "listing-photos", public: true },
       { id: "payment-screenshots", public: false },
     ]);
