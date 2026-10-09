@@ -11,7 +11,7 @@ export type ContactChannel = "call" | "messenger" | "viber";
 export function parseMessenger(input: string): string | null {
   const v = input.trim();
   if (!v) return "";
-  const id = v.match(/profile\.php\?id=(\d{5,20})/);
+  const id = v.match(/profile\.php\?id=(\d{5,20})/) ?? v.match(/facebook\.com\/people\/[^/]+\/(\d{5,20})/i);
   if (id) return id[1];
   const bare = v.replace(/^https?:\/\//i, "");
   const host = /^(www\.|m\.|web\.)?(facebook\.com|fb\.com|m\.me|messenger\.com\/t)\//i;
@@ -21,7 +21,19 @@ export function parseMessenger(input: string): string | null {
     .replace(host, "")
     .replace(/[/?#].*$/, "")
     .replace(/^@/, "");
+  // Facebook pages that aren't a person (share links, groups, posts) can't open a chat.
+  if (NOT_A_PROFILE.has(name.toLowerCase())) return null;
   return /^[A-Za-z0-9.]{3,50}$/.test(name) ? name : null;
+}
+
+const NOT_A_PROFILE = new Set([
+  "share", "people", "groups", "pages", "watch", "marketplace", "reel", "reels", "photo", "photo.php",
+  "story.php", "permalink.php", "profile.php", "events", "login", "home.php",
+]);
+
+/** Facebook "share" links (facebook.com/share/…) hide the profile, so they can't be turned into a Messenger link. */
+export function isFacebookShareLink(input: string): boolean {
+  return /facebook\.com\/share\//i.test(input);
 }
 
 export function messengerUrl(username: string): string {

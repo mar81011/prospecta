@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Alert, Field, Input, Textarea } from "@/components/ui";
+import { isFacebookShareLink, messengerUrl, parseMessenger } from "@/lib/contact";
 import { SubmitButton } from "@/components/submit-button";
 import { useFormAction } from "@/lib/actions/use-form-action";
 import { updateProfile } from "./actions";
@@ -51,13 +53,7 @@ export function ProfileForm({ profile, siteUrl }: { profile: ProfileFields; site
             </span>
           </label>
 
-          <Field
-            label="Facebook Messenger"
-            htmlFor="messenger"
-            hint="Your Facebook username or profile link. Adds a “Messenger” button that opens a chat with you. Leave blank to hide it."
-          >
-            <Input id="messenger" name="messenger" defaultValue={profile.messenger} placeholder="facebook.com/ana.reyes" maxLength={200} />
-          </Field>
+          <MessengerField initial={profile.messenger ?? ""} />
 
           <Field label="Short bio" htmlFor="bio" hint="Shown on your agent page. E.g. your PRC license, areas you cover, years of experience.">
             <Textarea
@@ -99,5 +95,53 @@ export function ProfileForm({ profile, siteUrl }: { profile: ProfileFields; site
       {state.message && <Alert tone="success">{state.message}</Alert>}
       <SubmitButton pending={pending}>Save profile</SubmitButton>
     </form>
+  );
+}
+
+/** Facebook Messenger link with help text and a live "Test link" to check it before saving. */
+function MessengerField({ initial }: { initial: string }) {
+  const [value, setValue] = useState(initial);
+  const parsed = parseMessenger(value);
+  return (
+    <Field
+      label="Facebook Messenger"
+      htmlFor="messenger"
+      hint={
+        <>
+          Adds a &ldquo;Messenger&rdquo; button so buyers can chat with you. Leave blank to hide it.
+          <br />
+          <strong>How to find it:</strong> open your Facebook profile in a browser (facebook.com) and copy the link
+          from the address bar. Or in the Messenger app, tap your photo to see your username.
+        </>
+      }
+    >
+      <Input
+        id="messenger"
+        name="messenger"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="facebook.com/profile.php?id=… or m.me/yourname"
+        maxLength={200}
+        aria-invalid={parsed === null}
+        aria-describedby="messenger-check"
+      />
+      <p id="messenger-check" className="text-xs" aria-live="polite">
+        {parsed === null ? (
+          <span className="text-red-700">
+            {isFacebookShareLink(value)
+              ? "That's a share link, which hides your profile. Open your profile in a browser and copy the address bar instead (it looks like facebook.com/yourname or facebook.com/profile.php?id=…)."
+              : "That doesn't look like a Facebook profile link or username."}
+          </span>
+        ) : parsed ? (
+          <span className="text-zinc-600">
+            Buyers will open{" "}
+            <a href={messengerUrl(parsed)} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-600 underline">
+              m.me/{parsed}
+            </a>{" "}
+            — tap it to test.
+          </span>
+        ) : null}
+      </p>
+    </Field>
   );
 }
