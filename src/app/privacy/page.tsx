@@ -4,8 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth/require";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Public privacy policy. Facebook Login requires a privacy policy URL and
-// data-deletion instructions (#delete) in the Meta app settings.
+// Public privacy policy, also linked from Google sign-in's consent screen.
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -79,8 +78,8 @@ export default async function PrivacyPage() {
             <ul className="list-disc space-y-2 pl-5">
               <li>
                 <strong>Your account:</strong> your name, and your email address or mobile number. If you sign in with
-                Facebook, we receive your name, email address (if your Facebook account has one) and profile picture. We
-                never receive your Facebook password, friends list or posts, and we never post on your behalf.
+                Google, we receive your name, email address and profile picture. We never receive your Google password or
+                access your Gmail, contacts or files.
               </li>
               <li>
                 <strong>Your public profile:</strong> details you choose to show buyers, such as your contact number, photo,
@@ -123,7 +122,8 @@ export default async function PrivacyPage() {
             <ul className="list-disc space-y-2 pl-5">
               <li>Supabase (database, sign-in and file storage) and Netlify (website hosting).</li>
               <li>Anthropic (AI features), only when an AI feature is used.</li>
-              <li>Meta (Facebook), only when you choose to sign in with Facebook or share a listing.</li>
+              <li>Google, only when you choose to sign in with Google.</li>
+              <li>Meta (Facebook), only when you share a listing there.</li>
               <li>An SMS provider, only if you sign in with a mobile number code.</li>
             </ul>
             <p>
@@ -160,9 +160,11 @@ export default async function PrivacyPage() {
               </li>
             </ol>
             <p>
-              If you signed in with Facebook, you can also remove Prospecta from your Facebook account under{" "}
-              <em>Settings &amp; privacy → Settings → Apps and websites</em>. That stops future Facebook sign-ins. To delete
-              the data we already hold, follow step 2 above.
+              If you signed in with Google, you can also remove Prospecta&apos;s access at{" "}
+              <a href="https://myaccount.google.com/connections" className="text-brand-600 underline" target="_blank" rel="noreferrer">
+                myaccount.google.com/connections
+              </a>
+              . That stops future Google sign-ins. To delete the data we already hold, follow step 2 above.
             </p>
           </Section>
 

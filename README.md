@@ -40,7 +40,7 @@ After that, admins can promote other users from **Admin → Agents → Manage**.
 | `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Screenshot uploads, invites, cron |
 | `NEXT_PUBLIC_SITE_URL` | server | Used in auth email links |
 | `CRON_SECRET` | server | Bearer token for `/api/cron/subscriptions` |
-| `FACEBOOK_LOGIN_ENABLED` | server | `true` shows "Continue with Facebook" (see Facebook sign-in) |
+| `GOOGLE_LOGIN_ENABLED` | server | `true` shows "Continue with Google" (see Google sign-in) |
 | `SEND_SMS_HOOK_SECRET` | server | Supabase Send SMS hook secret (`v1,whsec_…`) |
 | `SEMAPHORE_API_KEY` | server | Semaphore SMS API key; optional `SEMAPHORE_SENDER_NAME` |
 
@@ -169,17 +169,19 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 5. **Cron:** the Netlify scheduled function `netlify/functions/subscriptions-cron.mts` calls `/api/cron/subscriptions` daily at 16:00 UTC with `CRON_SECRET`. (`vercel.json` does the same if you ever host on Vercel.)
 6. **Check it works:** open a listing's public page and paste its link into https://developers.facebook.com/tools/debug/ to see the preview card.
 
-## Facebook sign-in
+## Google sign-in
 
-"Continue with Facebook" on Login and Register uses Supabase's Facebook provider (OAuth with PKCE; `/auth/callback` exchanges the code). New users get a Free profile with their Facebook name. Only `public_profile` and `email` are requested, so Meta App Review isn't needed. The button appears only when `FACEBOOK_LOGIN_ENABLED=true`.
+"Continue with Google" on Login and Register uses Supabase's Google provider (OAuth with PKCE; `/auth/callback` exchanges the code). New users get a Free profile with their Google name. Only the basic `openid`, `email` and `profile` scopes are used, so Google needs no app verification as long as no logo is uploaded. The button appears only when `GOOGLE_LOGIN_ENABLED=true`; Register then offers only Google, and Login keeps email/password behind "Sign in with email instead" (for admins).
 
-1. **Meta app:** at https://developers.facebook.com create an app with the "Authenticate and request data from users with Facebook Login" use case. Make sure `email` and `public_profile` are added.
-2. **Facebook Login → Settings:** add `https://<project-ref>.supabase.co/auth/v1/callback` to *Valid OAuth Redirect URIs*.
-3. **App settings → Basic:** App domain `<your-domain>`, Privacy Policy URL `https://<your-domain>/privacy`, User data deletion → instructions URL `https://<your-domain>/privacy#delete`, an app icon and a category. Copy the App ID and App Secret.
-4. **Publish** the app (switch it to Live). Until then only people with a role on the app can sign in.
-5. **Supabase → Authentication → Sign In / Providers → Facebook:** enable it and paste the App ID and App Secret.
-6. **Supabase → Authentication → URL Configuration:** Site URL `https://<your-domain>`, and add `https://<your-domain>/**` to Redirect URLs.
-7. **Netlify env:** `FACEBOOK_LOGIN_ENABLED=true`, then redeploy.
+(Facebook Login was tried first, but a Meta app linked to a business portfolio needs business verification with DTI/SEC documents.)
+
+1. **Google Cloud project:** at https://console.cloud.google.com create a project (e.g. "Prospecta").
+2. **Google Auth Platform → Branding** (the OAuth consent screen): app name, support email, home page `https://<your-domain>`, privacy policy `https://<your-domain>/privacy`. Authorized domains: `<your-domain>` and `<project-ref>.supabase.co`. Leave the logo empty (a logo triggers brand verification).
+3. **Audience:** External, then **Publish app** (In production). Only non-sensitive scopes are used, so no review is needed.
+4. **Clients → Create client → Web application:** Authorized JavaScript origin `https://<your-domain>`; Authorized redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`. Copy the Client ID and Client secret.
+5. **Supabase → Authentication → Sign In / Providers → Google:** enable it and paste the Client ID and secret.
+6. **Supabase → Authentication → URL Configuration:** Site URL `https://<your-domain>`, and `https://<your-domain>/**` in Redirect URLs.
+7. **Netlify env:** `GOOGLE_LOGIN_ENABLED=true`, then redeploy.
 
 ## Mobile number sign-in (SMS codes)
 

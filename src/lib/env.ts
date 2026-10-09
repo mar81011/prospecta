@@ -9,5 +9,5 @@ export const SUPABASE_ANON_KEY = () =>
   required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 export const SITE_URL = () => process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-/** "Continue with Facebook" is shown once the provider is set up in Supabase and this is "true". */
-export const FACEBOOK_LOGIN_ENABLED = () => process.env.FACEBOOK_LOGIN_ENABLED === "true";
+/** "Continue with Google" is shown once the provider is set up in Supabase and this is "true". */
+export const GOOGLE_LOGIN_ENABLED = () => process.env.GOOGLE_LOGIN_ENABLED === "true";

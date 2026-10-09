@@ -80,7 +80,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 
 ## Open items / known gaps
 
-- [ ] **Facebook sign-in setup (chosen 2026-10-11, free):** Meta app, Supabase Facebook provider, `FACEBOOK_LOGIN_ENABLED=true` (README → Facebook sign-in).
+- [ ] **Google sign-in setup (chosen 2026-10-11):** Google Cloud OAuth client, Supabase Google provider, `GOOGLE_LOGIN_ENABLED=true` (README → Google sign-in). Facebook Login was dropped: the Meta app is linked to a business portfolio and needs business verification (DTI/SEC). Revisit if the business gets registered.
 - [ ] **SMS sign-in setup (built, on hold: costs per SMS):** Semaphore account + credits, enable Phone provider, Send SMS hook, Netlify env vars (README → Mobile number sign-in).
 - [ ] **Email (deferred 2026-10-11, most agents don't check email):** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
 - [x] **Deploy:** Netlify site `prospectaph` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).
@@ -92,6 +92,8 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 - [ ] **Phase 8 — PayMongo:** only after traction + business verification (spec §28).
 
 ## Changelog
+
+- 2026-10-11 — Replaced Facebook sign-in with "Continue with Google" (behind `GOOGLE_LOGIN_ENABLED`); privacy policy updated. Header avatar linking to Account.
 
 - 2026-10-11 — "Continue with Facebook" on Login/Register (behind `FACEBOOK_LOGIN_ENABLED`), `/privacy` page with data-deletion instructions for Meta, site footer. Tests: 120 passing.
 

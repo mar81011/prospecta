@@ -102,21 +102,22 @@ export async function verifyPhoneCode(phone: string, code: string, next?: string
   redirect(safeNext(next));
 }
 
-// Facebook sign-in (Supabase OAuth, PKCE). New users get a Free profile named
-// after their Facebook name; /auth/callback exchanges the code for a session.
-export async function signInWithFacebook(formData: FormData) {
+// Google sign-in (Supabase OAuth, PKCE). New users get a Free profile named
+// after their Google name; /auth/callback exchanges the code for a session.
+export async function signInWithGoogle(formData: FormData) {
   const next = safeNext(formData.get("next"));
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "facebook",
+    provider: "google",
     options: {
       redirectTo: `${SITE_URL()}/auth/callback?next=${encodeURIComponent(next)}`,
-      scopes: "email",
+      // Let people with several Google accounts pick the right one.
+      queryParams: { prompt: "select_account" },
     },
   });
   if (error || !data.url) {
-    console.error("signInWithOAuth(facebook) failed", error?.message);
-    redirect("/login?error=facebook");
+    console.error("signInWithOAuth(google) failed", error?.message);
+    redirect("/login?error=oauth");
   }
   redirect(data.url);
 }
