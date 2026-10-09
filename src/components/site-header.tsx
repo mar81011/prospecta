@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Logo, ButtonLink } from "@/components/ui";
+import { Avatar, Logo, ButtonLink } from "@/components/ui";
 import { signOut } from "@/app/(auth)/actions";
 import type { CurrentUser } from "@/lib/auth/require";
+import { agentPhotoUrl } from "@/lib/listings";
 
 const AGENT_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -9,7 +10,6 @@ const AGENT_LINKS = [
   { href: "/leads", label: "Leads" },
   { href: "/pricing", label: "Plans" },
   { href: "/payment/history", label: "Payments" },
-  { href: "/account", label: "Account" },
 ] as const;
 
 export function SiteHeader({ user, unread = 0 }: { user: CurrentUser | null; unread?: number }) {
@@ -45,6 +45,17 @@ export function SiteHeader({ user, unread = 0 }: { user: CurrentUser | null; unr
                     {unread > 99 ? "99+" : unread}
                   </span>
                 )}
+              </Link>
+              <Link
+                href="/account"
+                title="Your account"
+                aria-label="Your account"
+                className="rounded-full p-0.5 transition-shadow hover:ring-2 hover:ring-brand-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+              >
+                <Avatar
+                  src={user.profile.photo_path ? agentPhotoUrl(user.profile.photo_path) : null}
+                  name={user.profile.name || user.email || user.profile.phone}
+                />
               </Link>
               <form action={signOut}>
                 <button type="submit" className="rounded-md px-3 py-1.5 text-zinc-500 hover:bg-zinc-100">

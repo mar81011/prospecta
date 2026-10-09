@@ -161,3 +161,28 @@ export function Logo() {
     </span>
   );
 }
+
+/** Up to two initials from a name, e.g. "Ana Reyes" -> "AR". */
+export function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}
+
+/** Round profile photo, or initials on a tinted circle when there is no photo. */
+export function Avatar({ src, name, className = "h-8 w-8 text-xs" }: { src?: string | null; name: string; className?: string }) {
+  return src ? (
+    // eslint-disable-next-line @next/next/no-img-element -- Supabase public URL
+    <img src={src} alt="" className={cx("shrink-0 rounded-full object-cover ring-1 ring-zinc-200", className)} />
+  ) : (
+    <span
+      aria-hidden
+      className={cx("flex shrink-0 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700", className)}
+    >
+      {initials(name) || "?"}
+    </span>
+  );
+}
