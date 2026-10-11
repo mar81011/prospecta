@@ -120,7 +120,7 @@ export default async function PrivacyPage() {
           <Section title="Who we share it with">
             <p>Only the service providers we need to run Prospecta, under their own data-protection terms:</p>
             <ul className="list-disc space-y-2 pl-5">
-              <li>Supabase (database, sign-in and file storage) and Netlify (website hosting).</li>
+              <li>Supabase (database, sign-in and file storage) and Vercel (website hosting).</li>
               <li>Anthropic (AI features), only when an AI feature is used.</li>
               <li>Google, only when you choose to sign in with Google.</li>
               <li>Meta (Facebook), only when you share a listing there.</li>

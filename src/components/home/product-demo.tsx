@@ -187,7 +187,7 @@ function ShareStep() {
           <LogoMark className="h-12 w-12 opacity-80" />
         </div>
         <div className="bg-zinc-50 px-3 py-2">
-          <p className="text-xs uppercase text-zinc-500">prospectaph.netlify.app</p>
+          <p className="text-xs uppercase text-zinc-500">prospecta-ph.vercel.app</p>
           <p className="font-semibold leading-snug">{LISTING.title}</p>
           <p className="text-xs text-zinc-500">
             {LISTING.price} · {LISTING.specs}

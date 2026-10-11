@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { SITE_URL } from "@/lib/env";
 
 // Google sign-in handled on our own domain, so Google's consent screen says
-// "to continue to prospectaph.netlify.app" instead of the Supabase project URL.
+// "to continue to prospecta-ph.vercel.app" instead of the Supabase project URL.
 // Flow: /auth/google -> Google -> /auth/google/callback -> exchange the code for
 // an ID token -> supabase.auth.signInWithIdToken(). The Supabase Google provider
 // must list GOOGLE_CLIENT_ID under Client IDs (it verifies the token's audience).

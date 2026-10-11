@@ -6,7 +6,7 @@ vi.mock("server-only", () => ({}));
 import { authorizationUrl, exchangeCodeForIdToken, googleRedirectUri, newAttempt } from "@/lib/google-oauth";
 
 beforeEach(() => {
-  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://prospectaph.netlify.app");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://prospecta-ph.vercel.app");
   vi.stubEnv("GOOGLE_CLIENT_ID", "client-123.apps.googleusercontent.com");
   vi.stubEnv("GOOGLE_CLIENT_SECRET", "secret-xyz");
 });
@@ -14,10 +14,10 @@ afterEach(() => vi.unstubAllEnvs());
 
 describe("Google sign-in on our own domain", () => {
   it("sends Google back to our callback, not to Supabase", () => {
-    expect(googleRedirectUri()).toBe("https://prospectaph.netlify.app/auth/google/callback");
+    expect(googleRedirectUri()).toBe("https://prospecta-ph.vercel.app/auth/google/callback");
     const url = new URL(authorizationUrl(newAttempt("/dashboard")));
     expect(url.origin + url.pathname).toBe("https://accounts.google.com/o/oauth2/v2/auth");
-    expect(url.searchParams.get("redirect_uri")).toBe("https://prospectaph.netlify.app/auth/google/callback");
+    expect(url.searchParams.get("redirect_uri")).toBe("https://prospecta-ph.vercel.app/auth/google/callback");
     expect(url.searchParams.get("client_id")).toBe("client-123.apps.googleusercontent.com");
     expect(url.searchParams.get("scope")).toBe("openid email profile");
   });
@@ -47,7 +47,7 @@ describe("Google sign-in on our own domain", () => {
     expect(body.get("code")).toBe("code-1");
     expect(body.get("code_verifier")).toBe("verifier-1");
     expect(body.get("client_secret")).toBe("secret-xyz");
-    expect(body.get("redirect_uri")).toBe("https://prospectaph.netlify.app/auth/google/callback");
+    expect(body.get("redirect_uri")).toBe("https://prospecta-ph.vercel.app/auth/google/callback");
   });
 
   it("returns null when Google rejects the code", async () => {

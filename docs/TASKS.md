@@ -5,7 +5,7 @@ Update this file as work is done.
 
 Legend: **Built** = code exists · **Tested** = covered by `npm test` · **Live** = passes `npm run test:e2e` (Playwright) against the real app + Supabase project `hdhjsnpsxgmmwyinwbnv`
 
-_Last updated: 2026-10-09_
+_Last updated: 2026-10-11_
 
 ## Definition of Done (spec §36)
 
@@ -81,6 +81,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 ## Open items / known gaps
 
 - [ ] **Google sign-in setup (chosen 2026-10-11):** Google Cloud OAuth client, Supabase Google provider, `GOOGLE_LOGIN_ENABLED=true` (README → Google sign-in). Facebook Login was dropped: the Meta app is linked to a business portfolio and needs business verification (DTI/SEC). Revisit if the business gets registered.
+- [ ] **Moved hosting to Vercel (2026-10-11):** Netlify free credits ran out (15 credits per deploy, reset 2026-11-05). Vercel project `prospectaph` (team mar-projects81011), address https://prospecta-ph.vercel.app, env vars copied from Netlify. To finish: make the domain public (Vercel → Domains / Deployment Protection), Google client redirect URIs + JS origin, Supabase Auth Site URL / Redirect URLs, then retire the Netlify site. Vercel Hobby is non-commercial per its terms; move to Pro or another host once agents pay.
 - [ ] **SMS sign-in setup (built, on hold: costs per SMS):** Semaphore account + credits, enable Phone provider, Send SMS hook, Netlify env vars (README → Mobile number sign-in).
 - [ ] **Email (deferred 2026-10-11, most agents don't check email):** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
 - [x] **Deploy:** Netlify site `prospectaph` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).

@@ -92,7 +92,7 @@ Prices, the billing period and limits live in the `plans` table. Admins edit the
 Every plan gets public listing pages, an agent page (`/a/{slug}`) with Call/Messenger/Viber buttons, the lead pipeline, and listing stats (views and contact taps, recorded by `record_listing_event()`; the agent's own visits and crawlers are skipped). Property matching and Messenger auto-replies are shown as "coming soon" on the plan cards.
 
 ### Daily maintenance
-A Netlify scheduled function (`netlify/functions/subscriptions-cron.mts`, 00:00 Manila) calls `GET /api/cron/subscriptions` with `Authorization: Bearer $CRON_SECRET`. The job:
+Vercel Cron (`vercel.json`, 00:00 Manila) calls `GET /api/cron/subscriptions` with `Authorization: Bearer $CRON_SECRET`. The job:
 
 - marks lapsed plans `expired`;
 - expires `PENDING` requests older than the configured TTL;
@@ -156,18 +156,18 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 - Buyer chat is capped at 12 replies per conversation and 100 per listing per day. When the agent's quota runs out, buyers see the inquiry form instead, and the agent's plan is never mentioned.
 - Without `ANTHROPIC_API_KEY`, the AI buttons are hidden.
 
-## Deploying (Netlify + Supabase)
+## Deploying (Vercel + Supabase)
 
 1. **Database:** apply pending migrations to the hosted project from your own terminal:
    `$env:SUPABASE_ACCESS_TOKEN="sbp_..."; npm run db:apply` (PowerShell). Use `--dry-run` to preview.
-2. **Code:** push this repo to GitHub, then import it at https://app.netlify.com/start (Netlify detects Next.js; no build settings needed).
-3. **Environment variables** in Netlify → Project configuration → Environment variables:
+2. **Code:** push this repo to GitHub, then import it at https://vercel.com/new (Vercel detects Next.js; no build settings needed), or run `vercel deploy --prod` from the repo.
+3. **Environment variables** in Vercel → Project → Settings → Environment Variables (or `vercel env add`):
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospectaph.netlify.app`. Share links and Facebook previews use this.
+   - `NEXT_PUBLIC_SITE_URL`: your production URL, e.g. `https://prospecta-ph.vercel.app`. Share links and Facebook previews use this.
    - `CRON_SECRET`: a long random string
    - `ANTHROPIC_API_KEY`, and optionally `AI_MODEL`
 4. **Supabase Auth** → URL Configuration: set Site URL to the production URL, and add `https://<your-domain>/**` to Redirect URLs.
-5. **Cron:** the Netlify scheduled function `netlify/functions/subscriptions-cron.mts` calls `/api/cron/subscriptions` daily at 16:00 UTC with `CRON_SECRET`. (`vercel.json` does the same if you ever host on Vercel.)
+5. **Cron:** Vercel Cron (`vercel.json`) calls `/api/cron/subscriptions` daily at 16:00 UTC and sends `CRON_SECRET` as a Bearer token.
 6. **Check it works:** open a listing's public page and paste its link into https://developers.facebook.com/tools/debug/ to see the preview card.
 
 ## Google sign-in
@@ -182,7 +182,7 @@ Claude powers four features. Each one uses 1 AI generation from the agent's mont
 4. **Clients → Create client → Web application:** Authorized JavaScript origin `https://<your-domain>`; Authorized redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`. Copy the Client ID and Client secret.
 5. **Supabase → Authentication → Sign In / Providers → Google:** enable it and paste the Client ID and secret.
 6. **Supabase → Authentication → URL Configuration:** Site URL `https://<your-domain>`, and `https://<your-domain>/**` in Redirect URLs.
-7. **Netlify env:** `GOOGLE_LOGIN_ENABLED=true`, then redeploy.
+7. **Vercel env:** `GOOGLE_LOGIN_ENABLED=true`, then redeploy.
 
 **Our own domain on Google's screen (recommended).** By default Google's consent screen says "to continue to <project-ref>.supabase.co", which looks like phishing. Setting `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` switches to our own flow (`/auth/google` → Google → `/auth/google/callback` → `signInWithIdToken`), so it says "to continue to <your-domain>". Add `https://<your-domain>/auth/google/callback` (and `http://localhost:3000/auth/google/callback` for local testing) to the Google client's **Authorized redirect URIs**. The Supabase Google provider must keep the same Client ID (it checks the token's audience).
 
@@ -193,7 +193,7 @@ Agents can register and sign in with a Philippine mobile number and a 6-digit SM
 1. **Semaphore:** create an account, load credits (an OTP SMS costs 2 credits), copy the API key. Optionally register a sender name such as `PROSPECTA`.
 2. **Supabase → Authentication → Sign In / Providers → Phone:** enable it. If it asks for an SMS provider, any value works; the hook replaces it.
 3. **Supabase → Authentication → Hooks → Send SMS hook:** type HTTPS, URL `https://<your-domain>/api/auth/sms-hook`, generate a secret and copy it.
-4. **Netlify env vars:** `SEND_SMS_HOOK_SECRET` (the `v1,whsec_…` value), `SEMAPHORE_API_KEY`, optionally `SEMAPHORE_SENDER_NAME`. Redeploy. The "Mobile number" tab on Login/Register appears only once both required variables are set.
+4. **Vercel env vars:** `SEND_SMS_HOOK_SECRET` (the `v1,whsec_…` value), `SEMAPHORE_API_KEY`, optionally `SEMAPHORE_SENDER_NAME`. Redeploy. The "Mobile number" tab on Login/Register appears only once both required variables are set.
 5. **Supabase → Authentication → Rate Limits:** set "SMS messages" per hour to what your Semaphore budget allows.
 
 New phone users get a profile with an empty email, and their number becomes their contact number on listing pages.

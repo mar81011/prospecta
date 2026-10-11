@@ -2,9 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Daily subscription maintenance, triggered by Netlify
-// (netlify/functions/subscriptions-cron.mts) or Vercel Cron (vercel.json), both
-// sending `Authorization: Bearer $CRON_SECRET`. Expires lapsed plans and stale payment
+// Daily subscription maintenance, triggered by Vercel Cron (vercel.json), which
+// sends `Authorization: Bearer $CRON_SECRET`. Expires lapsed plans and stale payment
 // requests and queues renewal reminders. Entitlements never depend on this job
 // having run: effective_plan() checks expiry dates on every request.
 
