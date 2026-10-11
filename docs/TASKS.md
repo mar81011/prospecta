@@ -49,7 +49,7 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 1. [x] **Migrations applied to the hosted project (2026-10-11)** via the Supabase MCP: `20261010000001` … `20261011000004` (lead pipeline, AI, agent photos, agent pages/contact/stats, phone sign-ups, hardening). Security advisor reviewed: remaining warnings are the intentionally public RPCs and admin functions that check `is_admin()`.
 2. [ ] Run `npm run test:e2e` (pipeline + AI specs are written but not yet run against the hosted DB).
 3. [x] `ANTHROPIC_API_KEY` and `AI_MODEL=claude-sonnet-5-5` set in Netlify (2026-10-11). Rotate the key (it was pasted in chat).
-4. [ ] Deploy: finish Netlify setup — connect the GitHub repo for auto-deploys, Supabase Auth URLs (README → Deploying). Site: https://prospectaph.netlify.app
+4. [x] Deploy: Vercel project `prospecta`, auto-deploys from GitHub. Site: https://prospecta-ph.vercel.app
 5. [ ] Admin → Settings: real GCash number; Account: your mobile number.
 
 ## Product roadmap — lead generation (list → share on Facebook → leads come in)
@@ -81,11 +81,12 @@ Not covered by e2e (they send real emails, capped at 2/hour): successful sign-up
 ## Open items / known gaps
 
 - [ ] **Google sign-in setup (chosen 2026-10-11):** Google Cloud OAuth client, Supabase Google provider, `GOOGLE_LOGIN_ENABLED=true` (README → Google sign-in). Facebook Login was dropped: the Meta app is linked to a business portfolio and needs business verification (DTI/SEC). Revisit if the business gets registered.
-- [ ] **Moved hosting to Vercel (2026-10-11):** Netlify free credits ran out (15 credits per deploy, reset 2026-11-05). Vercel project `prospectaph` (team mar-projects81011), address https://prospecta-ph.vercel.app, env vars copied from Netlify. To finish: make the domain public (Vercel → Domains / Deployment Protection), Google client redirect URIs + JS origin, Supabase Auth Site URL / Redirect URLs, then retire the Netlify site. Vercel Hobby is non-commercial per its terms; move to Pro or another host once agents pay.
+- [x] **Moved hosting to Vercel (2026-10-11):** Netlify free credits ran out (15 credits per deploy). Vercel project `mar81011s-projects/prospecta`, GitHub-connected (every push to `main` deploys), address https://prospecta-ph.vercel.app. Env vars copied, Supabase Site URL / Redirect URLs updated, Google sign-in shows our domain. Old Netlify site still serves the old version until it can deploy a redirect (credits reset 2026-11-05). Vercel Hobby is non-commercial per its terms; move to Pro once agents pay.
+- [ ] Once members use the new address: remove the Supabase callback from the Google client redirect URIs, and the Netlify URL from Supabase Redirect URLs.
 - [ ] **SMS sign-in setup (built, on hold: costs per SMS):** Semaphore account + credits, enable Phone provider, Send SMS hook, Netlify env vars (README → Mobile number sign-in).
 - [ ] **Email (deferred 2026-10-11, most agents don't check email):** Supabase default sender is limited to 2 emails/hour and custom templates are blocked on the free tier. Set up SMTP (e.g. Resend/Brevo) and then apply `supabase/templates/*`.
 - [x] **Deploy:** Netlify site `prospectaph` created (2026-10-09), production env vars set (`CRON_SECRET` generated, only stored in Netlify).
-- [ ] **Supabase Auth:** set Site URL / redirect URLs to https://prospectaph.netlify.app.
+- [x] **Supabase Auth:** Site URL / redirect URLs set to https://prospecta-ph.vercel.app (2026-10-11).
 - [ ] **Cron:** confirm the Netlify scheduled function `subscriptions-cron` calls `/api/cron/subscriptions` daily (Netlify → Logs → Functions).
 - [x] Supabase access token shared in chat was revoked (2026-10-09). Future migrations need a new token, the Supabase MCP sign-in (`/mcp`), or pasting the SQL into the dashboard SQL editor. All migrations up to `20261009000003` are applied.
 - [x] Git repository initialized; pushed to https://github.com/mar81011/prospecta.
